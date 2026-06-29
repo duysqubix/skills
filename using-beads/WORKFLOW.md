@@ -169,20 +169,19 @@ Always declare dependencies when they are known.
 
 ---
 
-## 8. Hours logging — a single running total (Rule 17)
+## 8. Hours logging — a single, manually-summed total (Rule 17)
 
-`bd` (v1.0.5) has **no native actual-hours field** — only `--estimate` (minutes, for *planning*). Track *actual* time worked as **one cumulative decimal total** in bead metadata under the `hours` key. We track *how much* time the ticket took, never *when* it was spent — no dates, timestamps, or per-session audit entries.
+The **only** mechanism for logging hours is bead metadata under the `hours` key — one cumulative decimal value. **Do NOT use `--estimate`, or any other field, for hours.** Track *how much* time the ticket took, never *when* (no dates, timestamps, or per-session entries).
 
-`hours` is a **single running total**, not a log of entries. To accumulate: read the current value, add the new time, and write back the new total (`--set-metadata` overwrites the key):
+⚠️ **`--set-metadata` stores one value per key — it does NOT auto-sum.** `hours=` overwrites whatever was already there. To add time you MUST read the current total, do the math yourself, and write the **new total** (never the increment):
 
 ```bash
-bd show   <id> --json                       # read the current metadata.hours (e.g. 2.5)
-bd update <id> --set-metadata hours=4.0     # 2.5 + 1.5 worked → new running total
+bd show   <id> --json                       # read current metadata.hours, e.g. 2.5
+# 2.5 already logged + 1.5 just worked = 4.0
+bd update <id> --set-metadata hours=4.0     # write the new TOTAL, not the delta
 ```
 
 - The number is the best joint judgment of the human + AI. **Consult the user when unsure** before committing hours.
-- `--estimate <minutes>` stays separate, for planning (plan-vs-actual), if wanted.
-- Run `bd prime` to confirm capabilities; if a future `bd` ships native time-logging, prefer it.
 
 ---
 
