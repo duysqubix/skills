@@ -11,7 +11,7 @@ Agent Skills is a collection of workflow skills. The **core set** covers the sof
 
 ## Skill Discovery
 
-When a task arrives, the very FIRST skill you invoke is **/using-beads**, THEN identify the development phase and apply the corresponding skill:
+When a task arrives, you **MUST** invoke **/using-beads** first — beads is our primary project-management solution, so it runs on **every** task — then identify the development phase and apply the corresponding skill:
 
 ```
 Task arrives
@@ -221,29 +221,82 @@ The skills above cover the **software-engineering lifecycle**. The families belo
 
 Product lens: discovery, strategy, execution, research, analytics, GTM, marketing, AI-shipping. Auto-load on PM-flavored tasks (PRDs, roadmaps, OKRs, personas, pricing, launches). Typical flow: **discovery → strategy → execution → GTM → ship**.
 
-**Discovery (13)** — `brainstorm-ideas-new` / `brainstorm-ideas-existing` (multi-lens ideation), `brainstorm-experiments-new` / `brainstorm-experiments-existing` (validation experiments / pretotypes), `identify-assumptions-new` / `identify-assumptions-existing` (risk mapping), `prioritize-assumptions`, `prioritize-features`, `analyze-feature-requests`, `opportunity-solution-tree`, `customer-interview-script` (Mom-Test guide — renamed from `interview-script`), `summarize-customer-interview` (renamed from `summarize-interview`), `metrics-dashboard`.
-
-**Strategy (12)** — `product-strategy`, `startup-canvas` (default for a new product), `product-vision`, `value-proposition`, `lean-canvas` (fast hypothesis), `business-model` (established BMC), `monetization-strategy`, `pricing-strategy`, `swot-analysis`, `pestle-analysis`, `porters-five-forces`, `ansoff-matrix`.
-
-**Execution (16)** — `create-prd`, `brainstorm-okrs`, `outcome-roadmap`, `sprint-plan`, `retro`, `release-notes`, `pre-mortem`, `stakeholder-map`, `summarize-meeting`, `user-stories`, `job-stories`, `wwas` (default backlog format), `test-scenarios`, `dummy-dataset`, `prioritization-frameworks`, `strategy-red-team`.
-
-**Market research (7)** — `user-personas`, `market-segments`, `user-segmentation`, `customer-journey-map`, `market-sizing`, `competitor-analysis`, `sentiment-analysis`.
-
-**Data analytics (3)** — `sql-queries`, `cohort-analysis`, `ab-test-analysis`.
-
-**Go-to-market (6)** — `gtm-strategy`, `beachhead-segment`, `ideal-customer-profile`, `growth-loops`, `gtm-motions`, `competitive-battlecard`.
-
-**Marketing & growth (5)** — `marketing-ideas`, `positioning-ideas`, `value-prop-statements`, `product-name`, `north-star-metric`.
-
-**Toolkit (4)** — `review-resume`, `draft-nda`, `privacy-policy`, `grammar-check` (grammar / logic / flow — pair with `prose-anti-slop` for AI-tell removal).
-
-**AI-shipping (2)** — `shipping-artifacts` (the doc set that makes a vibe-coded app reviewable), `intended-vs-implemented` (find the gap between documented intent and what the code actually does).
+| Group | Skill | When to invoke |
+|---|---|---|
+| Discovery | `brainstorm-ideas-new` | New product, initial discovery — multi-lens (PM/Design/Eng) feature ideation |
+| Discovery | `brainstorm-ideas-existing` | Existing product — multi-lens ideation for an identified opportunity |
+| Discovery | `brainstorm-experiments-new` | New product — lean validation experiments / pretotypes (XYZ hypotheses) |
+| Discovery | `brainstorm-experiments-existing` | Existing product — prototypes, A/B tests, spikes to test assumptions |
+| Discovery | `identify-assumptions-new` | Map risky assumptions for a new product idea (8 risk categories) |
+| Discovery | `identify-assumptions-existing` | Map risky assumptions for a feature (Value / Usability / Viability / Feasibility) |
+| Discovery | `prioritize-assumptions` | Rank assumptions on an Impact × Risk matrix; suggest experiments |
+| Discovery | `prioritize-features` | Rank a feature backlog by impact, effort, risk, strategic alignment |
+| Discovery | `analyze-feature-requests` | Triage / cluster customer feature requests by theme, impact, effort, risk |
+| Discovery | `opportunity-solution-tree` | Structure discovery: outcome → opportunities → solutions → experiments |
+| Discovery | `customer-interview-script` | Build a Mom-Test interview script (JTBD probing). Renamed from `interview-script` |
+| Discovery | `summarize-customer-interview` | Summarize an interview transcript (JTBD, signals, actions). Renamed from `summarize-interview` |
+| Discovery | `metrics-dashboard` | Define a product metrics dashboard (KPIs, sources, viz, alert thresholds) |
+| Strategy | `product-strategy` | Build a full strategy via the 9-section Product Strategy Canvas |
+| Strategy | `startup-canvas` | **Default for a new product** — Product Strategy + Business Model in one |
+| Strategy | `product-vision` | Craft an inspiring, achievable product vision statement |
+| Strategy | `value-proposition` | Design a value proposition with the 6-part JTBD template |
+| Strategy | `lean-canvas` | Fast hypothesis capture on a Lean Canvas |
+| Strategy | `business-model` | Model an established business on the 9-block Business Model Canvas |
+| Strategy | `monetization-strategy` | Brainstorm 3-5 revenue models with audience fit, risks, validation |
+| Strategy | `pricing-strategy` | Design pricing — models, willingness-to-pay, elasticity |
+| Strategy | `swot-analysis` | Strengths / Weaknesses / Opportunities / Threats with recommendations |
+| Strategy | `pestle-analysis` | Assess the macro environment (Political … Environmental) |
+| Strategy | `porters-five-forces` | Analyze industry attractiveness via the five forces |
+| Strategy | `ansoff-matrix` | Map growth options — penetration / development / diversification |
+| Execution | `create-prd` | Write a PRD on the 8-section template |
+| Execution | `brainstorm-okrs` | Draft team OKRs aligned to company objectives |
+| Execution | `outcome-roadmap` | Convert an output-focused roadmap into an outcome-focused one |
+| Execution | `sprint-plan` | Plan a sprint — capacity, story selection, dependencies, risks |
+| Execution | `retro` | Facilitate a sprint retrospective with prioritized action items |
+| Execution | `release-notes` | Generate user-facing release notes from tickets / PRDs / changelogs |
+| Execution | `pre-mortem` | Stress-test a PRD / launch plan for what could go wrong |
+| Execution | `stakeholder-map` | Power / interest grid + per-quadrant communication plan |
+| Execution | `summarize-meeting` | Turn a meeting transcript into notes + action items |
+| Execution | `user-stories` | Write user stories (3 C's, INVEST) with acceptance criteria |
+| Execution | `job-stories` | Write job stories — When [situation], I want…, so I can… |
+| Execution | `wwas` | **Default backlog format** — Why / What / Acceptance items |
+| Execution | `test-scenarios` | Derive manual / acceptance QA scenarios from user stories |
+| Execution | `dummy-dataset` | Generate realistic dummy / test datasets |
+| Execution | `prioritization-frameworks` | Reference for 9 frameworks (RICE, ICE, Kano, MoSCoW…) |
+| Execution | `strategy-red-team` | Attack the load-bearing assumptions of a PRD / roadmap / strategy |
+| Market research | `user-personas` | Build personas from research (JTBD, pains, gains) |
+| Market research | `market-segments` | Identify 3-5 segments with demographics, JTBD, product fit |
+| Market research | `user-segmentation` | Segment users from feedback by behavior, JTBD, needs |
+| Market research | `customer-journey-map` | Map the end-to-end journey — stages, touchpoints, emotions, pain points |
+| Market research | `market-sizing` | Estimate TAM / SAM / SOM (top-down + bottom-up) |
+| Market research | `competitor-analysis` | Map competitors' strengths, weaknesses, differentiation |
+| Market research | `sentiment-analysis` | Analyze user feedback at scale for sentiment + satisfaction |
+| Data analytics | `sql-queries` | Translate questions into SQL (BigQuery / Postgres / MySQL …) |
+| Data analytics | `cohort-analysis` | Retention curves, adoption trends, churn by cohort |
+| Data analytics | `ab-test-analysis` | Significance, sample size, ship / extend / stop decision |
+| Go-to-market | `gtm-strategy` | Build a GTM plan — channels, messaging, metrics, timeline |
+| Go-to-market | `beachhead-segment` | Pick the first beachhead market segment for launch |
+| Go-to-market | `ideal-customer-profile` | Define the ICP from research data |
+| Go-to-market | `growth-loops` | Design growth loops / flywheels (5 loop types) |
+| Go-to-market | `gtm-motions` | Choose GTM motions across 7 motion types |
+| Go-to-market | `competitive-battlecard` | Sales-ready battlecard vs a specific competitor |
+| Marketing & growth | `marketing-ideas` | 5 creative, cost-effective marketing ideas |
+| Marketing & growth | `positioning-ideas` | Positioning statements differentiated from competitors |
+| Marketing & growth | `value-prop-statements` | Marketing / sales / onboarding value-prop copy |
+| Marketing & growth | `product-name` | 5 memorable product-name candidates with rationale |
+| Marketing & growth | `north-star-metric` | Define a North Star + supporting input metrics |
+| Toolkit | `review-resume` | Review / tailor a PM resume against 10 best practices |
+| Toolkit | `draft-nda` | Draft an NDA between two parties |
+| Toolkit | `privacy-policy` | Draft a privacy policy (GDPR / compliance) |
+| Toolkit | `grammar-check` | Grammar / logic / flow check — pair with `prose-anti-slop` for AI tells |
+| AI-shipping | `shipping-artifacts` | The doc set that makes a vibe-coded app reviewable before shipping |
+| AI-shipping | `intended-vs-implemented` | Find gaps between documented intent and what the code actually does |
 
 ### Design & Taste — `taste-skill` (13 skills)
 
 Anti-slop visual direction for landing pages, portfolios, brand, and redesigns. **Routing:** the built-in `frontend` skill is the *router* (it also brings Lighthouse / real-browser QA + brand refs); these are the deeper taste *rulebooks* it draws on. Complementary to `frontend-ui-engineering` (production behavior / a11y / state) — taste decides *look & feel*, frontend-ui-engineering decides *how the component behaves*.
 
-| Skill | Use when |
+| Skill | When to invoke |
 |---|---|
 | `design-taste-frontend` | **Default.** Vague brief → infer design direction, ship non-templated UI |
 | `design-taste-frontend-v1` | Backward-compat only (superseded by the default above) |
@@ -263,16 +316,30 @@ Anti-slop visual direction for landing pages, portfolios, brand, and redesigns. 
 
 Hands-on offensive / operational security playbooks. **Routing:** these are *technique playbooks*; `security-and-hardening` stays for *prevention while building*; built-in `security-research` / `security-review` stay for *whole-codebase audit orchestration*; `ci-cd-and-automation` stays for *generic* CI (these add the *security gates*).
 
-- **AppSec testing** — `testing-for-xss-vulnerabilities`, `exploiting-sql-injection-vulnerabilities`, `testing-api-security-with-owasp-top-10`, `testing-for-broken-access-control`
-- **DevSecOps gates** — `implementing-secret-scanning-with-gitleaks`, `integrating-sast-into-github-actions-pipeline`, `performing-container-security-scanning-with-trivy`, `securing-github-actions-workflows`
-- **Supply chain** — `detecting-malicious-npm-packages`, `detecting-dependency-confusion`
-- **AI / agent security** — `testing-prompt-injection-in-rag-pipelines`, `auditing-mcp-servers-for-tool-poisoning`
+| Group | Skill | When to invoke |
+|---|---|---|
+| AppSec testing | `testing-for-xss-vulnerabilities` | Test for reflected, stored, and DOM-based XSS |
+| AppSec testing | `exploiting-sql-injection-vulnerabilities` | Find / exploit SQLi — error, union, blind, time-based |
+| AppSec testing | `testing-api-security-with-owasp-top-10` | Assess REST / GraphQL against the OWASP API Top 10 |
+| AppSec testing | `testing-for-broken-access-control` | Privilege escalation, IDOR, missing function-level checks |
+| DevSecOps gates | `implementing-secret-scanning-with-gitleaks` | Detect / prevent hardcoded secrets — hooks, CI, custom rules |
+| DevSecOps gates | `integrating-sast-into-github-actions-pipeline` | Wire CodeQL / Semgrep into CI with blocking quality gates |
+| DevSecOps gates | `performing-container-security-scanning-with-trivy` | Scan images / filesystems / K8s manifests + SBOM |
+| DevSecOps gates | `securing-github-actions-workflows` | Harden workflows vs supply-chain / credential / privilege attacks |
+| Supply chain | `detecting-malicious-npm-packages` | Triage npm packages for install-script malware / exfiltration |
+| Supply chain | `detecting-dependency-confusion` | Detect public-over-private resolution (npm, PyPI, Maven) |
+| AI / agent security | `testing-prompt-injection-in-rag-pipelines` | Probe RAG for injection via poisoned context / embeddings |
+| AI / agent security | `auditing-mcp-servers-for-tool-poisoning` | Scan MCP servers for poisoning, SSRF, unauth exposure |
 
 > **Full library (on-demand):** 817 cybersecurity skills are cloned at `~/.repos/Anthropic-Cybersecurity-Skills/skills/`. The 12 above are curated for app / dev work. For any other domain — DFIR, threat hunting, cloud IR, OT/ICS, malware RE, forensics, red-team C2, compliance — browse that directory and copy the specific `<skill>/` folder into `~/.agents/skills/` on demand. Authorized use only.
 
 ### Prose — `prose-anti-slop` (1 skill)
 
-Strip predictable AI writing tells from prose — filler openers, passive voice, formulaic "not X, but Y" contrasts, em-dashes, pull-quote cadence — scored on a 1–10 rubric. **Routing:** distinct from built-in `remove-ai-slops` (which cleans **code**); pairs with pm `grammar-check` (correctness / logic / flow). Use when drafting or editing any human-facing text.
+| Skill | When to invoke |
+|---|---|
+| `prose-anti-slop` | Drafting or editing any human-facing text — strip AI writing tells (filler openers, passive voice, "not X, but Y" contrasts, em-dashes, pull-quote cadence), scored on a 1–10 rubric |
+
+**Routing:** distinct from built-in `remove-ai-slops` (which cleans **code**); pairs with pm `grammar-check` (correctness / logic / flow).
 
 ---
 
