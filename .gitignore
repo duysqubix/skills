@@ -1,0 +1,15 @@
+# --- Local agent / orchestration state (machine-specific, not portable) ---
+.omo/
+.codegraph
+
+# --- Leftover duplicate archives (real content lives in bd-to-jira/) ---
+/bd-to-jira.zip
+/bd-to-jira (2).zip
+
+# --- OS / editor cruft ---
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.idea/
+.vscode/
