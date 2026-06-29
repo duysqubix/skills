@@ -1,0 +1,4 @@
+# Keep the build context tiny: the Dockerfile test only needs install.sh.
+# Excludes .git, .omo, the .codegraph symlink, all skills, etc.
+*
+!install.sh
