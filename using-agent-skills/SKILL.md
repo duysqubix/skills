@@ -11,7 +11,7 @@ Agent Skills is a collection of workflow skills. The **core set** covers the sof
 
 ## Skill Discovery
 
-When a task arrives, identify the development phase and apply the corresponding skill:
+When a task arrives, the very FIRST skill you invoke is **/using-beads**, THEN identify the development phase and apply the corresponding skill:
 
 ```
 Task arrives
