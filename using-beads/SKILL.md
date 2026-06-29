@@ -1,3 +1,12 @@
+---
+name: using-beads
+description: Beads (`bd`) issue-tracker reference and the team's bead-based development SDLC — epics, orchestrator/sub-agent status authority, signal/resolution/sprint labels, markdown comment audit trail, dependencies, hours logging, and opt-in cross-environment comms. Use when tracking ANY work (task, bug, feature, epic, chore), when creating/claiming/closing/labeling/commenting on beads, when delegating to sub-agents, or whenever `bd`/beads is the project tracker. Invoke FIRST on every task and inject into every sub-agent.
+---
+
+# Using Beads
+
+**▶ Read [WORKFLOW.md](WORKFLOW.md) FIRST.** It defines the bead-based development SDLC — epics, status authority, labels, sprints, comments-as-audit, dependencies, hours, and opt-in cross-environment comms — that governs all task tracking. This file (`SKILL.md`) is the `bd` command reference + session-close protocol.
+
 # 🚨 SESSION CLOSE PROTOCOL 🚨
 
 **CRITICAL**: Before saying "done" or "complete", you MUST run this checklist:
