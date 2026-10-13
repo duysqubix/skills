@@ -28,7 +28,7 @@ Skills that operate on the tracker, the toolchain, or the skill library itself r
 | Tracker | `using-beads` | **Invoke first on every task** — `bd` reference + the bead-based SDLC. Inject into every sub-agent |
 | Tracker | `to-issues` | Break an approved plan / spec / PRD into tracer-bullet vertical-slice issues |
 | Tracker | `bd-to-jira` | Sync closed beads into Jira stories (epic link, sprint, Done transition, worklog); labels synced beads |
-| Tracker | `bd-to-excel` | Tally the previous month's non-live hours from beads into the Non-Live Time Tracker workbook |
+| Tracker | `non-live-hours` | Monthly non-live hours report. Run `non-live-repo-audit` per repo first; the runbook then drives the `bd-to-excel` engine. Internal, local-only (gitignored, not shipped) |
 | Meta | `find-skills` | "Is there a skill for X?" — discover and install a skill that doesn't exist locally yet |
 | Meta | `write-a-skill` | No skill exists and none is installable — author one with proper structure and progressive disclosure |
 | Ops | `bw-secrets` | Create / modify / remove Bitwarden items, including shared org collections, via the `bw` CLI |
