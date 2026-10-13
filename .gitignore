@@ -6,6 +6,11 @@
 /bd-to-jira.zip
 /bd-to-jira (2).zip
 
+# --- Internal-only skills (hold private hours data; never publish to the mirror) ---
+/bd-to-excel/
+/non-live-hours/
+/non-live-repo-audit/
+
 # --- OS / editor cruft ---
 .DS_Store
 Thumbs.db
