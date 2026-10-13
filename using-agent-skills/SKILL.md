@@ -98,7 +98,7 @@ Task arrives
     ├── Reverse engineering a shipped binary, app, package, firmware, or web bundle?
     │                                  → reverse-engineer-anything  (REA: rea MCP + CLI; not for source repos)
     │
-    ├── Want a non-Claude second opinion? ─→ /oh-my-claudecode:ccg  (Codex + Gemini, Claude synthesizes)
+    ├── Want a non-Claude second opinion? ─→ /oh-my-claudecode:ask  (one advisor per call; run Codex + Gemini, synthesize)
     ├── No skill seems to fit? ────────────→ find-skills (find/install) → write-a-skill (author one)
     │
     └── Anything below? ──────────────────→ load the family reference, then route inside it
@@ -113,7 +113,7 @@ The lifecycle above is the **core set**. These families cover other domains — 
 | Product Management (68) | PRDs, OKRs, roadmaps, discovery, personas, pricing, metrics, GTM, launches | [reference/product-management.md](reference/product-management.md) |
 | Design & Taste (14) | What `impeccable` doesn't make: image-only mockups, brand boards, decks, Stitch, borrowed style worlds | [reference/design-and-taste.md](reference/design-and-taste.md) |
 | Security Operations (12) | Actively *testing* a vuln class, DevSecOps gates, supply chain, AI/agent security | [reference/security-ops.md](reference/security-ops.md) |
-| Multi-Model + Ops & Meta | Cross-vendor second opinions (`ccg`); tracker, toolchain, and skill-library work | [reference/ops-and-meta.md](reference/ops-and-meta.md) |
+| Multi-Model + Ops & Meta | Cross-vendor second opinions (`ask`); tracker, toolchain, and skill-library work | [reference/ops-and-meta.md](reference/ops-and-meta.md) |
 | Prose (1) | Human-facing text — strip AI writing tells, scored 1–10 | `prose-anti-slop` (no reference needed) |
 
 ### Cross-family routing (when two skills look similar)
@@ -123,7 +123,7 @@ The lifecycle above is the **core set**. These families cover other domains — 
 | `create-prd` | engineering acceptance criteria, file plan, tests | `spec-driven-development` — the PRD frames the product, the spec drives the code (chain them) |
 | `idea-refine` | product-discovery ideation with PM/Design/Eng lenses | `brainstorm-ideas-new` / `-existing` — idea-refine still wins for sharpening one vague idea |
 | `doubt-driven-development` | pressure-testing a product strategy or PRD | `strategy-red-team` — doubt-driven stays for code/architecture decisions |
-| `doubt-driven-development` | a second opinion from a **different model** | `/oh-my-claudecode:ccg` — doubt-driven is fresh-context self-review; ccg is cross-vendor |
+| `doubt-driven-development` | a second opinion from a **different model** | `/oh-my-claudecode:ask` — doubt-driven is fresh-context self-review; ask is cross-vendor |
 | `planning-and-task-breakdown` | ranking a product / feature backlog | `prioritize-features` / `prioritization-frameworks` — planning stays for decomposing an approved spec |
 | `planning-and-task-breakdown` | filing the decomposed work into the tracker | `to-issues` — plan into steps first, then file them |
 | `test-driven-development` | designing manual / acceptance QA scenarios from stories | `test-scenarios` — TDD stays for failing-test-first code |
@@ -206,11 +206,11 @@ Running alongside rather than after: `ponytail` (every coding step), `impeccable
 | Output | i-have-adhd | **Shapes every response.** Next action first, numbered steps, lists ≤5 |
 | Track | using-beads | **Runs on every task.** `bd` tracker + the bead-based SDLC |
 | Track | to-issues | Split an approved plan/spec/PRD into independently-grabbable tracker issues |
-| Advise | /oh-my-claudecode:ccg | Fan a question out to Codex + Gemini in parallel, then synthesize |
+| Advise | /oh-my-claudecode:ask | Route a question to Codex, Gemini, or another CLI advisor; run two and synthesize to cross-check |
 
 ## Maintenance
 
-**Provenance:** the extended families were imported from `~/.repos/taste-skill`, `~/.repos/stop-slop`, `~/.repos/pm-skills`, and `~/.repos/Anthropic-Cybersecurity-Skills`. Re-pull a repo and re-copy a `<skill>/` folder into `~/.agents/skills/` to update it. Multi-model orchestration is **not** in that root — `ccg` and `ask` ship with the oh-my-claudecode plugin and update with it; run `/oh-my-claudecode:omc-reference` for its full catalog.
+**Provenance:** the extended families were imported from `~/.repos/taste-skill`, `~/.repos/stop-slop`, `~/.repos/pm-skills`, and `~/.repos/Anthropic-Cybersecurity-Skills`. Re-pull a repo and re-copy a `<skill>/` folder into `~/.agents/skills/` to update it. Multi-model orchestration is **not** in that root — `ask` ships with the oh-my-claudecode plugin and updates with it; run `/oh-my-claudecode:wiki` for its full catalog.
 
 **House-rule and REA sources:**
 

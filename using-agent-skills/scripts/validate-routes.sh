@@ -24,7 +24,7 @@ mapfile -t DOCS < <(printf '%s\n' "$DOC"; find "$HERE/reference" -name '*.md' 2>
 
 # Names that legitimately appear without being a directory in $ROOT:
 # source-repo names, documented renames, plugin skills, and CLI built-ins.
-ALLOW='^(pm-skills|taste-skill|stop-slop|interview-script|summarize-interview|oh-my-claudecode|omc-reference|ai-slop-cleaner|autopilot|ultrawork|ralph|ralplan|team|ask|ccg|code-review|simplify|security-review|frontend-design|skill-name|reference|scripts|i-have-adhd|ponytail-(review|audit|debt))$'
+ALLOW='^(pm-skills|taste-skill|stop-slop|interview-script|summarize-interview|oh-my-claudecode|ai-slop-cleaner|autopilot|ralph|ralplan|team|ask|code-review|simplify|security-review|frontend-design|skill-name|reference|scripts|i-have-adhd|ponytail-(review|audit|debt))$'
 
 echo "== orphans: installed but unreachable from any doc =="
 while IFS= read -r s; do

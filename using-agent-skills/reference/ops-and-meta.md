@@ -1,6 +1,6 @@
 ---
 name: reference-ops-and-meta
-description: Multi-Model Orchestration (ccg / ask) and Workflow Ops & Meta (tracker, skill-library, toolchain) families. Loaded from using-agent-skills for cross-vendor second opinions or work that operates on the tracker or the skill library itself.
+description: Multi-Model Orchestration (ask) and Workflow Ops & Meta (tracker, skill-library, toolchain) families. Loaded from using-agent-skills for cross-vendor second opinions or work that operates on the tracker or the skill library itself.
 ---
 
 # Multi-Model Orchestration — `oh-my-claudecode` plugin
@@ -9,18 +9,15 @@ Cross-vendor advisors. Every other skill in this library runs *inside* Claude; t
 
 | Skill | When to invoke |
 |---|---|
-| `/oh-my-claudecode:ccg` | Want Codex **and** Gemini on the same question in parallel, then one synthesized answer |
-| `/oh-my-claudecode:ask` | Want **one** named external advisor (`omc ask codex "…"` / `omc ask gemini "…"`) — ccg is the tri-model wrapper around it |
+| `/oh-my-claudecode:ask` (Codex: `$ask`) | One named external advisor per call (`omc ask codex "…"` / `omc ask gemini "…"`). Run two and synthesize for a cross-vendor check |
 
-**How `ccg` works:** decompose the request into two advisor prompts — Codex takes architecture / correctness / backend / risk / test strategy, Antigravity (`agy`) or Gemini takes UX / content clarity / alternatives / docs polish — run both via `omc ask`, read the artifacts from `.omc/artifacts/ask/`, then return **one** answer with agreements, explicit conflicts, chosen direction + rationale, and an action checklist.
-
-**Invoke with a task description** — `/oh-my-claudecode:ccg <task>`. Bare `/ccg` has nothing to decompose and will just have to ask you for the target.
+**Cross-vendor check with `ask`** (the retired `ccg` wrapper did this; OMC 5.x removed it): split the request into two advisor prompts — Codex takes architecture / correctness / backend / risk / test strategy, Antigravity (`agy`) or Gemini takes UX / content clarity / alternatives / docs polish — run both via `omc ask`, read the artifacts from `.omc/artifacts/ask/`, then return **one** answer with agreements, explicit conflicts, chosen direction + rationale, and an action checklist.
 
 **Requirements & fallbacks:** needs `omc` plus at least one of `codex` / `agy` / `gemini` on PATH. Antigravity (`agy`) is the intended second lane; where it isn't installed, `gemini` takes that lane. With only one provider, continue and **state which perspective is missing**. With none, answer as Claude alone and say the external advisors were unavailable.
 
-**Beyond these two:** the oh-my-claudecode plugin carries a larger workflow set not routed here — `autopilot`, `ralph`, `ralplan`, `team`, and more. Run `/oh-my-claudecode:omc-reference` for the full catalog.
+**Beyond `ask`:** the oh-my-claudecode plugin carries a larger workflow set not routed here — `autopilot`, `ralph`, `ralplan`, `team`, and more. Run `/oh-my-claudecode:wiki` for the full catalog.
 
-**Routing:** reach for `ccg` when the risk is *model-specific blind spots* (cross-validation, disputed architecture calls, review from genuinely independent eyes). Stay with `doubt-driven-development` when the risk is *unexamined reasoning* — that one is fresh-context self-review and needs no external CLI. Neither replaces `code-review-and-quality` as the pre-merge gate.
+**Routing:** reach for `ask` when the risk is *model-specific blind spots* (cross-validation, disputed architecture calls, review from genuinely independent eyes). Stay with `doubt-driven-development` when the risk is *unexamined reasoning* — that one is fresh-context self-review and needs no external CLI. Neither replaces `code-review-and-quality` as the pre-merge gate.
 
 ### Workflow Ops & Meta
 
