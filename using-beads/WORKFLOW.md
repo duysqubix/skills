@@ -208,29 +208,51 @@ Two standing epics hold the "messages":
 - **Notes from Production: For Dev**
 - **Notes from Dev: For Production**
 
-Each message is a bead whose **labels** track where it sits in the handshake (plain coexisting labels — *not* `bd set-state`, because a note and its done-marker must co-exist):
+Each message is a bead carrying two independent label groups: a **message-type** label (`-note` / `-action`) and a **handshake-state** label (`:<state>`). They are separate labels so a note and its done-marker co-exist rather than overwrite each other.
 
-| Label | Direction | Meaning |
+The lane prefix names **who wrote the message**, not who should read it:
+
+| Label | Written by | Meaning |
 |---|---|---|
-| `for-dev:note` | prod → dev | A note for development agents (usually written by a prod agent). |
-| `for-dev:action` | prod → dev | A specific recommended action for development agents. |
-| `for-dev:done` | dev → prod | **Must accompany `for-dev:note`.** Dev agents have read / addressed the note; lets prod verify. |
-| `for-prod:note` | dev → prod | A note for production agents (usually written by a dev agent). |
-| `for-prod:action` | dev → prod | A specific recommended action for production agents. |
-| `for-prod:done` | prod → dev | **Must accompany `for-prod:note`.** Prod agents have read / addressed the note. |
+| `prod-note` | prod → dev | An observation from the production lane for development agents. |
+| `prod-action` | prod → dev | A specific recommended action for development agents. |
+| `dev-note` | dev → prod | An observation from the development lane for production agents. |
+| `dev-action` | dev → prod | A specific recommended action for production agents. |
+| `meta` | either | Marks the bead as a comms-lane message rather than a work item. Applied to every message in both lanes. |
+
+Handshake state — one at a time, updated as the message moves:
+
+| Label | Meaning |
+|---|---|
+| `<lane>:claimed` | An agent on the receiving side has picked the message up. |
+| `<lane>:done` | The message has been read and addressed; the other side can verify. |
+| `<lane>:idle` | Nothing outstanding on this lane right now. |
+
+Unlike the signal labels in §4, these state labels ARE driven by `bd set-state`, which
+records each transition as an auto-generated `event`-type bead titled `State change: <lane> → <state>`.
+Those event beads are tracking artifacts, not work: never log `hours` on them and never
+label them `no-live`, or the monthly report will estimate phantom hours against them.
 
 Example:
 
 ```bash
 # A prod agent reports a production issue for dev to triage:
 bd create --type=bug --parent=<notes-from-prod-epic> \
-  --title="500s on /checkout under load" --labels S07,for-dev:action,no-live \
+  --title="500s on /checkout under load" --labels S17,prod-action,meta,no-live \
   --description="Repro steps + stack trace (markdown)…"
 
 # A dev agent, after addressing it, signals back:
-bd label add <id> for-dev:done
+bd set-state <id> prod=done --reason "Addressed in <bead-id>"
 bd comment   <id> "Fixed in <bead-id>; root cause was connection-pool exhaustion."
 ```
+
+`bd set-state <id> <dimension>=<value>` is atomic: it creates the event bead, drops any
+existing label for that dimension, and adds the new `<dimension>:<value>` label as a
+fast-lookup cache. Pass `--reason` — it is what the event bead records.
+
+> **Verified against a live production tracker on 2026-08-12.** The
+> previously documented `for-dev:*` / `for-prod:*` spelling had **zero** uses; the labels
+> above account for all 64 comms-label applications across the 25 beads in the two lanes.
 
 ---
 
