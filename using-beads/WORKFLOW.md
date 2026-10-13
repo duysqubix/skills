@@ -250,9 +250,10 @@ bd comment   <id> "Fixed in <bead-id>; root cause was connection-pool exhaustion
 existing label for that dimension, and adds the new `<dimension>:<value>` label as a
 fast-lookup cache. Pass `--reason` — it is what the event bead records.
 
-> **Verified against a live production tracker on 2026-08-12.** The
-> previously documented `for-dev:*` / `for-prod:*` spelling had **zero** uses; the labels
-> above account for all 64 comms-label applications across the 25 beads in the two lanes.
+> **History, not a live convention.** These lanes were used in one place: between Pulse
+> Telemetry's development agents and its production agent, through its two notes epics
+> (`(Meta) Development Notes`, `(Meta) Production Notes`), before the phone-driven agent
+> pipeline existed. Don't build new dev → production flows (releases included) on them.
 
 ---
 
