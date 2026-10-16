@@ -1,6 +1,6 @@
 ---
 name: using-agent-skills
-description: Routes a task to the right agent skill and enforces three house rules — i-have-adhd shapes all output, ponytail is the only simplicity lane while coding, impeccable owns frontend design. Covers the software-engineering lifecycle (spec, planning, implementation, testing, debugging, review, shipping), reverse engineering of shipped artifacts (REA), and five extended families — product management (PRD, OKRs, roadmap, personas, pricing, GTM), design & taste, security testing, prose, and multi-model orchestration. Use when starting a session, when a task arrives and no skill is obviously in play, when two skills look like they overlap, when work needs tracking in beads/bd, or when the user asks what skill applies or wants a second opinion from Codex or Gemini. With the argument `update` (or when asked to update or upgrade the skill library), reinstalls the whole library from duysqubix/skills.
+description: Routes a task to the right agent skill and enforces four house rules — i-have-adhd shapes all output, ponytail is the only simplicity lane while coding, impeccable owns frontend design, every reported time is in US Central Time (CST/CDT). Covers the software-engineering lifecycle (spec, planning, implementation, testing, debugging, review, shipping), reverse engineering of shipped artifacts (REA), and five extended families — product management (PRD, OKRs, roadmap, personas, pricing, GTM), design & taste, security testing, prose, and multi-model orchestration. Use when starting a session, when a task arrives and no skill is obviously in play, when two skills look like they overlap, when work needs tracking in beads/bd, or when the user asks what skill applies or wants a second opinion from Codex or Gemini. With the argument `update` (or when asked to update or upgrade the skill library), reinstalls the whole library from duysqubix/skills.
 ---
 
 # Using Agent Skills
@@ -57,6 +57,16 @@ All frontend design work starts with `impeccable`: new UI, redesigns, critique, 
 - It replaces `design-taste-frontend`, `redesign-existing-projects`, and the `frontend-design` plugin as the default. Don't run them alongside it.
 - `frontend-ui-engineering` still owns component behavior, state, and a11y wiring. Chain it after.
 - The Design & Taste family stays for what impeccable doesn't make: image-only mockups, brand boards, PowerPoint, Google Stitch, or a named style world to borrow.
+
+### 4. Times → US Central Time
+
+Every time you report to the user is in US Central Time (`America/Chicago`). That covers timestamps, log and commit times, schedules, deadlines and "last updated" lines.
+
+1. Convert from whatever the source uses (UTC, `Z`, epoch, server-local). Label each time with the abbreviation in effect **on that date**: `CDT` (UTC−5) from the second Sunday in March to the first Sunday in November, `CST` (UTC−6) otherwise. Example: `2026-10-16 09:05 CDT`.
+2. Don't work out the offset in your head. Use the tz database: `TZ=America/Chicago date -d @<epoch>` (GNU), `TZ=America/Chicago date -r <epoch>` (macOS), or `ZoneInfo("America/Chicago")` in Python.
+3. Leave raw values you didn't produce (log lines, API payloads, file contents) as they are when quoting them. Add the Central conversion beside them.
+
+Code, configs and stored data keep whatever timezone the project uses (usually UTC). This rule governs what you say to the user, not what you write to disk. Off only when the user asks for another zone.
 
 ## Quick start
 
