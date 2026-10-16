@@ -10,7 +10,8 @@
 #   curl -fsSL https://raw.githubusercontent.com/duysqubix/skills/main/install.sh | sh
 #
 # Env overrides:
-#   AGENTS_SKILLS_DIR   target dir (default: ~/.agents/skills)
+#   AGENTS_SKILLS_DIR   target dir (default: ~/.agents/skills; Codex reads it)
+#   CLAUDE_SKILLS_DIR   where Claude Code links go (default: ~/.claude/skills)
 #   SKILLS_REPO         source repo (default: duysqubix/skills)
 #   SKILLS_BRANCH       branch      (default: main)
 set -eu
@@ -18,6 +19,7 @@ set -eu
 REPO="${SKILLS_REPO:-duysqubix/skills}"
 BRANCH="${SKILLS_BRANCH:-main}"
 DEST="${AGENTS_SKILLS_DIR:-$HOME/.agents/skills}"
+CLAUDE_DIR="${CLAUDE_SKILLS_DIR:-$HOME/.claude/skills}"
 TARBALL="https://github.com/${REPO}/archive/refs/heads/${BRANCH}.tar.gz"
 
 say() { printf '%s\n' "$*"; }
@@ -61,7 +63,20 @@ done
 
 [ "$installed" -gt 0 ] || die "no skills (SKILL.md directories) found in ${REPO}@${BRANCH}"
 
+# Codex reads ${DEST} directly; Claude Code reads ${CLAUDE_DIR}, so link each
+# skill there. Never touch an entry that already exists (link or real dir).
+mkdir -p "$CLAUDE_DIR" || die "could not create ${CLAUDE_DIR}"
+linked=0
+for skill in "$DEST"/*/; do
+  name="$(basename "$skill")"
+  [ -f "${skill}SKILL.md" ] || continue
+  [ -e "${CLAUDE_DIR}/${name}" ] || [ -L "${CLAUDE_DIR}/${name}" ] && continue
+  ln -s "${DEST}/${name}" "${CLAUDE_DIR}/${name}"
+  linked=$((linked + 1))
+done
+
 say ""
 say "Installed/updated ${installed} skill(s) into ${DEST}"
+[ "$linked" -gt 0 ] && say "Linked ${linked} new skill(s) into ${CLAUDE_DIR} for Claude Code"
 say "Your other skills in ${DEST} were left untouched."
 say "Start a new agent session to pick them up."

@@ -29,7 +29,7 @@ ALLOW='^(pm-skills|taste-skill|stop-slop|interview-script|summarize-interview|oh
 echo "== orphans: installed but unreachable from any doc =="
 while IFS= read -r s; do
   grep -qF -- "$s" "${DOCS[@]}" || { echo "  ORPHAN  $s"; fail=1; }
-done < <(find "$ROOT" -mindepth 1 -maxdepth 1 -type d -not -name '.*' -printf '%f\n' | sort)
+done < <(for d in "$ROOT"/*/; do basename "$d"; done | sort)
 
 echo "== dead routes: cited by a doc but not installed =="
 while IFS= read -r n; do

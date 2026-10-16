@@ -9,6 +9,16 @@ Each skill encodes a process a senior practitioner follows. This meta-skill pick
 
 Skills live in `~/.agents/skills/` (invoked `/<name>` in Claude, `$<name>` in Codex) and in plugins (invoked `/<plugin>:<name>` or `$<plugin>:<name>`): oh-my-claudecode, ponytail, i-have-adhd. All are in scope.
 
+## Argument: `update`
+
+Invoked as `/using-agent-skills update` (Claude) or `$using-agent-skills update` (Codex), or when the user asks to update / upgrade the skill library: skip routing, update the whole library, then stop.
+
+1. Run the installer from [duysqubix/skills](https://github.com/duysqubix/skills). macOS / Linux: `curl -fsSL https://raw.githubusercontent.com/duysqubix/skills/main/install.sh | sh`. Windows: `irm https://raw.githubusercontent.com/duysqubix/skills/main/install.ps1 | iex`. It clean-replaces every skill the repo ships in `~/.agents/skills` (this one included), leaves other skills alone, and links new skills into `~/.claude/skills` for Claude. Codex reads `~/.agents/skills` directly.
+2. If `~/.repos/skills` is a git clone (the editing copy), run `git -C ~/.repos/skills pull --ff-only`. If it is dirty or diverged, report that and leave it alone.
+3. Report the installer's `Installed/updated N skill(s)` line and the pull result, then tell the user to start a new session to load the new versions.
+
+The installer overwrites local edits to shipped skills. If the user has changed one in `~/.agents/skills` without pushing it, confirm before running.
+
 ## House rules (always on)
 
 These sit above the routing tree. They hold for every task, in Claude and Codex alike, until the user turns one off.
@@ -114,7 +124,8 @@ The lifecycle above is the **core set**. These families cover other domains — 
 | Design & Taste (14) | What `impeccable` doesn't make: image-only mockups, brand boards, decks, Stitch, borrowed style worlds | [reference/design-and-taste.md](reference/design-and-taste.md) |
 | Security Operations (12) | Actively *testing* a vuln class, DevSecOps gates, supply chain, AI/agent security | [reference/security-ops.md](reference/security-ops.md) |
 | Multi-Model + Ops & Meta | Cross-vendor second opinions (`ask`); tracker, toolchain, and skill-library work | [reference/ops-and-meta.md](reference/ops-and-meta.md) |
-| Prose (1) | Human-facing text — strip AI writing tells, scored 1–10 | `prose-anti-slop` (no reference needed) |
+| Prose (2) | Human-facing text — strip AI writing tells, scored 1–10; or edit a draft while keeping the writer's voice | `prose-anti-slop`; `no-ai-slop` for voice-preserving edits or detect-only (no reference needed) |
+| Music | Driving a live Ableton Live session (MIDI clips, devices, tempo, arrangement) | `ableton-mcp` (no reference needed) |
 
 ### Cross-family routing (when two skills look similar)
 
@@ -209,6 +220,8 @@ Running alongside rather than after: `ponytail` (every coding step), `impeccable
 | Advise | /oh-my-claudecode:ask | Route a question to Codex, Gemini, or another CLI advisor; run two and synthesize to cross-check |
 
 ## Maintenance
+
+**Distribution:** this library ships from [duysqubix/skills](https://github.com/duysqubix/skills). Edit in `~/.repos/skills`, push to `main`, then run `using-agent-skills update` on each machine.
 
 **Provenance:** the extended families were imported from `~/.repos/taste-skill`, `~/.repos/stop-slop`, `~/.repos/pm-skills`, and `~/.repos/Anthropic-Cybersecurity-Skills`. Re-pull a repo and re-copy a `<skill>/` folder into `~/.agents/skills/` to update it. Multi-model orchestration is **not** in that root — `ask` ships with the oh-my-claudecode plugin and updates with it; run `/oh-my-claudecode:wiki` for its full catalog.
 

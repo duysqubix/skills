@@ -8,13 +8,14 @@
 # Usage:
 #   irm https://raw.githubusercontent.com/duysqubix/skills/main/install.ps1 | iex
 #
-# Env overrides: $env:AGENTS_SKILLS_DIR, $env:SKILLS_REPO, $env:SKILLS_BRANCH
+# Env overrides: $env:AGENTS_SKILLS_DIR, $env:CLAUDE_SKILLS_DIR, $env:SKILLS_REPO, $env:SKILLS_BRANCH
 $ErrorActionPreference = 'Stop'
 
 $Repo   = if ($env:SKILLS_REPO)       { $env:SKILLS_REPO }       else { 'duysqubix/skills' }
 $Branch = if ($env:SKILLS_BRANCH)     { $env:SKILLS_BRANCH }     else { 'main' }
 $Dest   = if ($env:AGENTS_SKILLS_DIR) { $env:AGENTS_SKILLS_DIR } else { Join-Path $env:USERPROFILE '.agents\skills' }
-$Url    = "https://github.com/$Repo/archive/refs/heads/$Branch.zip"
+$ClaudeDir = if ($env:CLAUDE_SKILLS_DIR) { $env:CLAUDE_SKILLS_DIR } else { Join-Path $env:USERPROFILE '.claude\skills' }
+$Url    ="https://github.com/$Repo/archive/refs/heads/$Branch.zip"
 
 $Tmp = Join-Path ([System.IO.Path]::GetTempPath()) ('skills-' + [guid]::NewGuid().ToString())
 New-Item -ItemType Directory -Force -Path $Tmp | Out-Null
@@ -41,8 +42,21 @@ try {
     }
     if ($installed -eq 0) { throw "no skills (SKILL.md directories) found in $Repo@$Branch" }
 
+    # Codex reads $Dest directly; Claude Code reads $ClaudeDir, so link each skill there
+    # (junctions need no admin). Never touch an entry that already exists.
+    New-Item -ItemType Directory -Force -Path $ClaudeDir | Out-Null
+    $linked = 0
+    Get-ChildItem -Path $Dest -Directory | Where-Object { Test-Path (Join-Path $_.FullName 'SKILL.md') } | ForEach-Object {
+        $link = Join-Path $ClaudeDir $_.Name
+        if (-not (Test-Path $link)) {
+            New-Item -ItemType Junction -Path $link -Target $_.FullName | Out-Null
+            $linked++
+        }
+    }
+
     Write-Host ''
     Write-Host "Installed/updated $installed skill(s) into $Dest"
+    if ($linked -gt 0) { Write-Host "Linked $linked new skill(s) into $ClaudeDir for Claude Code" }
     Write-Host "Your other skills in $Dest were left untouched."
     Write-Host 'Start a new agent session to pick them up.'
 }
