@@ -1,3 +1,8 @@
+---
+name: update-opencode
+description: Update opencode and the oh-my-openagent (omo) plugin — upgrade opencode, keep its binary on PATH, run the omo doctor and fix what it reports, then smoke-test both versions. Use when asked to update or upgrade opencode, omo, or oh-my-openagent.
+---
+
 # Update Opencode and Oh-My-OpenAgent Plugin
 
 
