@@ -130,7 +130,7 @@ The lifecycle above is the **core set**. These families cover other domains — 
 
 | Family | Load when the task is about… | Reference |
 |---|---|---|
-| Product Management (68) | PRDs, OKRs, roadmaps, discovery, personas, pricing, metrics, GTM, launches | [reference/product-management.md](reference/product-management.md) |
+| Product Management (69) | PRDs, OKRs, roadmaps, discovery, personas, pricing, metrics, GTM, launches | [reference/product-management.md](reference/product-management.md) |
 | Design & Taste (14) | What `impeccable` doesn't make: image-only mockups, brand boards, decks, Stitch, borrowed style worlds | [reference/design-and-taste.md](reference/design-and-taste.md) |
 | Security Operations (12) | Actively *testing* a vuln class, DevSecOps gates, supply chain, AI/agent security | [reference/security-ops.md](reference/security-ops.md) |
 | Multi-Model + Ops & Meta | Cross-vendor second opinions (`ask`); tracker, toolchain, and skill-library work | [reference/ops-and-meta.md](reference/ops-and-meta.md) |

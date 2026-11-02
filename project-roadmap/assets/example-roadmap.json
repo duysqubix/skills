@@ -1,0 +1,80 @@
+{
+"meta": {
+ "title": "Kitchen Remodel Roadmap",
+ "eyebrow": "Home project · Galley kitchen → open plan",
+ "summary": "Open the galley kitchen to the dining room and replace cabinets, counters and appliances, keeping a working sink for as many weeks as possible.",
+ "phaseNoun": "phase",
+ "stepNoun": "milestone",
+ "timezone": "America/Chicago",
+ "updatedAt": "2026-11-02T15:00:00Z",
+ "nextAction": "Ridgeline submits the permit drawings by Nov 6, then places the cabinet order.",
+ "waitingOn": "builder",
+ "refs": [
+  {
+   "label": "Budget",
+   "value": "$41,200 + 10%"
+  },
+  {
+   "label": "Builder",
+   "value": "Ridgeline Builders"
+  },
+  {
+   "label": "Target",
+   "value": "Mar 20, 2027"
+  }
+ ],
+ "owners": {
+  "me": {
+   "label": "You",
+   "tone": "accent"
+  },
+  "builder": {
+   "label": "Ridgeline",
+   "tone": "amber"
+  },
+  "designer": {
+   "label": "Designer",
+   "tone": "amber"
+  },
+  "city": {
+   "label": "City inspector",
+   "tone": "neutral"
+  }
+ },
+ "footer": "Example data that ships with the project-roadmap skill."
+},
+"phases": [
+{"id": "p1", "order": 1, "code": "P1", "short": "Plan", "title": "Plan and budget", "when": "Sep 8 – Oct 3", "purpose": "Agree what changes and what it can cost before anyone draws plans.", "scope": ["Scope of work", "Three bids", "Budget with contingency"], "doneWhen": "A signed scope and a budget with a 10% contingency."},
+{"id": "p2", "order": 2, "code": "P2", "short": "Design", "title": "Design and permits", "when": "Oct 6 – Nov 21", "purpose": "Turn the scope into drawings the city will approve and the builder can price exactly.", "scope": ["Layout and cabinet design", "Finishes and appliances", "Building permit"], "doneWhen": "Permit issued and every finish chosen.", "waitsOn": "City permit review, 3 to 5 weeks"},
+{"id": "p3", "order": 3, "code": "P3", "short": "Demolition", "title": "Demolition and structure", "when": "Dec 1–12", "purpose": "Open the wall and get the structure signed off before anything new goes in.", "doneWhen": "Beam in and framing inspection passed."},
+{"id": "p4", "order": 4, "code": "P4", "short": "Rough-in", "title": "Plumbing, electrical and HVAC rough-in", "when": "Dec 15 – Jan 16", "purpose": "Run everything inside the walls once, and pass inspection before drywall closes it up."},
+{"id": "p5", "order": 5, "code": "P5", "short": "Finishes", "title": "Cabinets, counters and finishes", "when": "Jan 19 – Mar 6", "purpose": "Install everything you see and use every day."},
+{"id": "p6", "order": 6, "code": "P6", "short": "Close-out", "title": "Final inspection and punch list", "when": "Mar 9–20", "purpose": "Get the final sign-off and fix the small things while the crew is still around."}
+],
+"steps": [
+{"id": "p1-1", "phase": "p1", "order": 1, "label": "Agree the scope: wall out, island in, sink stays put", "owner": "me", "status": "done", "at": "2026-09-14", "result": "Scope v2 signed."},
+{"id": "p1-2", "phase": "p1", "order": 2, "label": "Get three bids and choose a builder", "owner": "me", "status": "done", "at": "2026-09-30", "result": "Ridgeline at $41,200, plus a 10% contingency."},
+{"id": "p2-1", "phase": "p2", "order": 1, "label": "Finalize the layout and cabinet design", "owner": "designer", "status": "done", "at": "2026-10-20", "result": "Layout v3 approved; the island seats three."},
+{"id": "p2-2", "phase": "p2", "order": 2, "label": "Choose counters, tile and appliances", "owner": "me", "status": "done", "at": "2026-10-29", "result": "Quartz counters and an induction range."},
+{"id": "p2-3", "phase": "p2", "order": 3, "label": "Submit drawings for the building permit", "owner": "builder", "status": "active", "due": "Nov 6"},
+{"id": "p2-4", "phase": "p2", "order": 4, "label": "Order the cabinets (8-week lead time)", "owner": "builder", "due": "Nov 14"},
+{"id": "p3-1", "phase": "p3", "order": 1, "label": "Set up a temporary kitchen in the dining room", "owner": "me"},
+{"id": "p3-2", "phase": "p3", "order": 2, "label": "Remove the wall and the old cabinets", "owner": "builder"},
+{"id": "p3-3", "phase": "p3", "order": 3, "label": "Install the beam and pass the framing inspection", "owner": "city"},
+{"id": "p4-1", "phase": "p4", "order": 1, "label": "Run plumbing and power to the island", "owner": "builder"},
+{"id": "p4-2", "phase": "p4", "order": 2, "label": "Pass the rough-in inspection", "owner": "city"}
+],
+"gates": [
+{"id": "d1", "order": 1, "code": "D1", "text": "Keep the old range hood, or vent through the roof?", "status": "decided", "owner": "me", "phases": ["P2"], "resolution": "Decided Oct 29: vent through the roof, which adds $900."},
+{"id": "g1", "order": 2, "code": "G1", "text": "The building permit has to be issued before demolition starts.", "status": "open", "owner": "city", "phases": ["P3"]},
+{"id": "r1", "order": 3, "code": "R1", "text": "Cabinets take 8 weeks; ordering after Nov 14 pushes finishes into April.", "status": "open", "owner": "builder", "phases": ["P5"]}
+],
+"activity": [
+{"at": "2026-09-14", "text": "Scope signed: wall out, island in.", "phase": "P1"},
+{"at": "2026-09-30", "text": "Ridgeline Builders chosen at $41,200.", "phase": "P1"},
+{"at": "2026-10-20", "text": "Layout v3 approved.", "phase": "P2"},
+{"at": "2026-10-29", "text": "D1 decided: vent through the roof.", "phase": "P2"},
+{"at": "2026-10-29", "text": "Finishes chosen: quartz counters, induction range.", "phase": "P2"},
+{"at": "2026-11-02T15:00:00Z", "text": "Roadmap created.", "phase": "P2"}
+]
+}

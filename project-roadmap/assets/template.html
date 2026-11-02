@@ -1,0 +1,687 @@
+<title>{{TITLE}}</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Semi+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a route map of every phase (stations) and step (dots) with a "you are here" flag, then last / here / next cards, then the full line of nodes beside gates and activity; one column on phones. */
+:root {
+  --bg: #F1F4F5; --surface: #FFFFFF; --sunken: #E6EBEE; --ink: #12202A; --muted: #56656F; --line: #CFD8DE;
+  --accent: #0B6E8A; --accent-soft: #D9EDF3; --on-accent: #FFFFFF;
+  --done: #2B7A4B; --done-soft: #E1F1E7; --on-done: #FFFFFF;
+  --ready: #9A5F08; --ready-soft: #FAEED8;
+  --blocked: #B23A3A; --blocked-soft: #F7E2E2;
+  --todo: #8A98A2; --todo-soft: #EBEFF1;
+  --font-display: "Barlow Semi Condensed", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Barlow", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0D1418; --surface: #141D23; --sunken: #1B262D; --ink: #E1E9ED; --muted: #97A7B1; --line: #2A3842;
+    --accent: #4FB6D2; --accent-soft: #12303A; --on-accent: #0D1418;
+    --done: #5EC28C; --done-soft: #15301F; --on-done: #0D1418;
+    --ready: #E6A845; --ready-soft: #33270F; --blocked: #E87676; --blocked-soft: #371A1A;
+    --todo: #6F808B; --todo-soft: #1D2830;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0D1418; --surface: #141D23; --sunken: #1B262D; --ink: #E1E9ED; --muted: #97A7B1; --line: #2A3842;
+  --accent: #4FB6D2; --accent-soft: #12303A; --on-accent: #0D1418;
+  --done: #5EC28C; --done-soft: #15301F; --on-done: #0D1418;
+  --ready: #E6A845; --ready-soft: #33270F; --blocked: #E87676; --blocked-soft: #371A1A;
+  --todo: #6F808B; --todo-soft: #1D2830;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.5; }
+.wrap { max-width: 1200px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 56px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 26px; }
+.wrap > * { min-width: 0; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; line-height: 1.15; }
+a { color: var(--accent); }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.mono { font-family: var(--font-mono); font-size: 0.86em; }
+
+/* Header */
+.head { display: grid; gap: 8px; }
+.head h1 { font-size: clamp(30px, 4.6vw, 46px); font-weight: 700; letter-spacing: -0.01em; }
+.summary { margin: 0; max-width: 70ch; font-size: 16px; color: var(--muted); }
+.refs { display: flex; flex-wrap: wrap; gap: 6px 16px; color: var(--muted); font-size: 13.5px; }
+.refs b { font-family: var(--font-mono); font-weight: 500; color: var(--ink); font-size: 12.5px; }
+.refs b a { color: var(--accent); text-underline-offset: 2px; }
+
+.sec-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; }
+.sec-head h2, .col > h2 { font-family: var(--font-mono); font-size: 13px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.sec-sub { margin: 0; color: var(--muted); font-size: 14px; font-variant-numeric: tabular-nums; }
+.sec-sub b { color: var(--ink); font-weight: 600; }
+
+/* Route map */
+.overview { display: grid; gap: 10px; }
+.ov-frame { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; min-width: 0; }
+.ov-scroll { position: relative; overflow-x: auto; padding: 16px 6px 18px; }
+.stations { list-style: none; margin: 0; padding: 0; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(138px, 1fr); }
+.st { display: grid; justify-items: center; align-content: start; gap: 7px; text-align: center; padding: 0 6px; min-width: 0; }
+.flag { position: relative; visibility: hidden; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap; color: var(--on-accent); background: var(--accent); padding: 3px 8px; border-radius: 4px; }
+.flag::after { content: ""; position: absolute; left: 50%; bottom: -5px; margin-left: -5px; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 5px solid var(--accent); }
+.st.here .flag { visibility: visible; }
+.track { position: relative; width: calc(100% + 12px); margin: 0 -6px; height: 48px; display: grid; place-items: center; }
+.track::before, .track::after { content: ""; position: absolute; top: 50%; height: 4px; margin-top: -2px; width: 50%; background: repeating-linear-gradient(to right, var(--todo) 0 7px, transparent 7px 12px); }
+.track::before { left: 0; }
+.track::after { right: 0; }
+.st:first-child .track::before, .st:last-child .track::after { display: none; }
+.st.reached .track::before, .st.passed .track::after { background: var(--done); }
+.hub { position: relative; z-index: 1; width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; font-family: var(--font-mono); font-weight: 500; font-size: 13.5px; text-decoration: none; border: 3px solid var(--todo); background: var(--surface); color: var(--ink); }
+.st.done .hub { background: var(--done); border-color: var(--done); color: var(--on-done); }
+.st.active .hub, .st.here .hub { border-color: var(--accent); box-shadow: 0 0 0 5px var(--accent-soft); }
+.st.ready .hub { border-color: var(--ready); }
+.st.blocked .hub { border-color: var(--blocked); }
+.st-name { font-family: var(--font-display); font-weight: 600; font-size: 15px; line-height: 1.2; color: var(--ink); text-decoration: none; max-width: 16ch; }
+.st-name:hover { color: var(--accent); }
+.st-meta { font-family: var(--font-mono); font-size: 11.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.dots { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px; max-width: 128px; }
+.dot { width: 18px; height: 18px; display: grid; place-items: center; border-radius: 50%; }
+.dot::before { content: ""; width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--todo); background: var(--surface); transition: transform 0.12s ease; }
+.dot:hover::before { transform: scale(1.3); }
+.dot.done::before { background: var(--done); border-color: var(--done); }
+.dot.here::before { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.dot.blocked::before, .dot.failed::before { border-color: var(--blocked); background: var(--blocked-soft); }
+.dot.active::before { border-color: var(--accent); }
+.dot.skipped::before { border-color: var(--done); border-style: dashed; }
+.legend { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 18px; color: var(--muted); font-size: 13px; }
+.legend li { display: inline-flex; align-items: center; gap: 7px; }
+.lg { width: 11px; height: 11px; border-radius: 50%; border: 2px solid var(--todo); background: var(--surface); }
+.lg.done { background: var(--done); border-color: var(--done); }
+.lg.here { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.lg.blocked { border-color: var(--blocked); background: var(--blocked-soft); }
+.lg-line { width: 22px; height: 4px; border-radius: 2px; background: var(--done); }
+.lg-line.dash { background: repeating-linear-gradient(to right, var(--todo) 0 5px, transparent 5px 9px); }
+
+/* Last / here / next */
+.now { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.45fr) minmax(0, 1fr); gap: 14px; align-items: stretch; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: grid; gap: 7px; align-content: start; min-width: 0; }
+.card .k { font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); }
+.card.here { border: 2px solid var(--accent); }
+.card.here .k { color: var(--accent); }
+.nid { font-family: var(--font-mono); font-size: 12.5px; font-weight: 500; color: var(--muted); text-decoration: none; font-variant-numeric: tabular-nums; }
+a.nid:hover { color: var(--accent); }
+.card.here .nid { font-size: 14px; color: var(--accent); }
+.nlabel { margin: 0; font-size: 15px; font-weight: 500; }
+.card.here .nlabel { font-family: var(--font-display); font-size: 21px; font-weight: 600; line-height: 1.25; text-wrap: balance; }
+.clamp { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; overflow: hidden; }
+.nmeta { margin: 0; display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; color: var(--muted); font-size: 13px; }
+.nresult { margin: 0; font-size: 13.5px; color: var(--muted); }
+.next-action { margin: 4px 0 0; padding-top: 10px; border-top: 1px solid var(--line); font-size: 14.5px; }
+.ahead-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.ahead-list li { display: grid; gap: 1px; font-size: 14px; }
+.ahead-list .clamp { -webkit-line-clamp: 3; }
+.then { margin: 2px 0 0; padding-top: 10px; border-top: 1px solid var(--line); font-size: 13.5px; color: var(--muted); }
+.then b { color: var(--ink); font-weight: 600; }
+
+/* Pills and chips */
+.pill { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; padding: 2px 9px; border-radius: 999px; white-space: nowrap; }
+.pill::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.pill.done, .pill.decided { color: var(--done); background: var(--done-soft); }
+.pill.active { color: var(--accent); background: var(--accent-soft); }
+.pill.ready, .pill.open { color: var(--ready); background: var(--ready-soft); }
+.pill.blocked, .pill.failed { color: var(--blocked); background: var(--blocked-soft); }
+.pill.planned, .pill.todo, .pill.skipped, .pill.dropped, .pill.next { color: var(--muted); background: var(--todo-soft); }
+.who { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.02em; padding: 1px 7px; border-radius: 4px; white-space: nowrap; border: 1px solid var(--line); color: var(--muted); background: var(--sunken); }
+.who.t-accent { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+.who.t-amber { color: var(--ready); border-color: var(--ready); background: var(--ready-soft); }
+.who.t-green { color: var(--done); border-color: var(--done); background: var(--done-soft); }
+.who.t-red { color: var(--blocked); border-color: var(--blocked); background: var(--blocked-soft); }
+.who.t-ink { color: var(--ink); border-color: var(--ink); background: var(--surface); }
+.here-tag { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--on-accent); background: var(--accent); padding: 2px 8px; border-radius: 4px; white-space: nowrap; }
+.due { font-family: var(--font-mono); font-size: 11.5px; color: var(--muted); white-space: nowrap; }
+
+/* Main: the line of nodes, beside gates and activity */
+.main { display: grid; grid-template-columns: minmax(0, 1.9fr) minmax(0, 1fr); gap: 26px; align-items: start; }
+.col { display: grid; gap: 12px; min-width: 0; }
+.line { list-style: none; margin: 0; padding: 6px 0; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+.line > li { position: relative; display: grid; grid-template-columns: 54px minmax(0, 1fr); padding: 10px 18px 10px 0; scroll-margin-top: 24px; }
+.line > li::before, .line > li::after { content: ""; position: absolute; left: 25px; width: 4px; background: repeating-linear-gradient(to bottom, var(--todo) 0 6px, transparent 6px 11px); }
+.line > li::before { top: 0; height: var(--node-y); }
+.line > li::after { top: var(--node-y); bottom: 0; }
+.line > li.up-on::before { background: var(--done); }
+.line > li.down-on::after { background: var(--done); }
+.line > li.here::before { background: var(--accent); }
+.line > li.first::before { display: none; }
+.line > li.last::after { display: none; }
+
+.line > li.empty { display: block; margin: 8px; padding: 22px 18px; }
+.line > li.empty::before, .line > li.empty::after { display: none; }
+.line > li.w-row { --node-y: 36px; padding-top: 14px; border-top: 1px solid var(--line); }
+.line > li.w-row.first { border-top: 0; }
+.line > li.w-row::before { top: -1px; }
+.hubnode { grid-column: 1; justify-self: center; position: relative; z-index: 1; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; font-family: var(--font-mono); font-weight: 500; font-size: 13px; border: 3px solid var(--todo); background: var(--surface); color: var(--ink); }
+.w-row.done .hubnode { background: var(--done); border-color: var(--done); color: var(--on-done); }
+.w-row.active .hubnode, .w-row.here .hubnode { border-color: var(--accent); box-shadow: 0 0 0 5px var(--accent-soft); }
+.w-row.ready .hubnode { border-color: var(--ready); }
+.w-row.blocked .hubnode { border-color: var(--blocked); }
+.w-body, .s-body { grid-column: 2; min-width: 0; display: grid; gap: 6px; }
+.w-top { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+.w-top h3 { font-size: 21px; font-weight: 600; min-width: 0; }
+.w-eyebrow { font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.progress { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.bar { width: 160px; max-width: 100%; height: 6px; border-radius: 3px; background: var(--todo-soft); overflow: hidden; }
+.bar > span { display: block; height: 100%; background: var(--done); }
+.w-row.active .bar > span { background: var(--accent); }
+.w-purpose { margin: 0; font-size: 15px; max-width: 72ch; }
+.facts { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 14px; margin: 2px 0 0; font-size: 14px; }
+.facts dt { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); padding-top: 3px; }
+.facts dd { margin: 0; min-width: 0; }
+.facts ul { margin: 0; padding-left: 18px; }
+.gate { font-family: var(--font-mono); font-size: 12.5px; font-weight: 500; text-decoration: none; padding: 0 6px; border-radius: 4px; color: var(--ready); background: var(--ready-soft); }
+.toggle { justify-self: start; font: inherit; font-size: 13.5px; color: var(--accent); background: none; border: 1px solid var(--line); border-radius: 6px; padding: 4px 11px; cursor: pointer; }
+.toggle:hover { border-color: var(--accent); }
+
+.s-row { --node-y: 23px; }
+.stop { grid-column: 1; justify-self: center; position: relative; z-index: 1; width: 18px; height: 18px; margin-top: 4px; border-radius: 50%; display: grid; place-items: center; font-size: 10px; font-weight: 700; line-height: 1; border: 2px solid var(--todo); background: var(--surface); color: var(--surface); }
+.s-row.done .stop { background: var(--done); border-color: var(--done); color: var(--on-done); }
+.s-row.skipped .stop { border-color: var(--done); border-style: dashed; }
+.s-row.here .stop { width: 22px; height: 22px; margin-top: 2px; background: var(--accent); border-color: var(--accent); animation: pulse 2.2s ease-out infinite; }
+.s-row.blocked .stop, .s-row.failed .stop { border-color: var(--blocked); background: var(--blocked-soft); color: var(--blocked); }
+.s-row.active .stop { border-color: var(--accent); }
+.s-row.here { background: var(--accent-soft); }
+.s-top { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
+.sid { font-family: var(--font-mono); font-size: 12px; font-weight: 500; color: var(--muted); font-variant-numeric: tabular-nums; }
+.s-label { margin: 0; font-size: 14.5px; }
+.s-row.done .s-label, .s-row.skipped .s-label { color: var(--muted); }
+.s-row.here .s-label { font-weight: 500; }
+.s-result { margin: 0; font-size: 13.5px; background: var(--sunken); border-radius: 6px; padding: 6px 10px; }
+.s-result time { font-family: var(--font-mono); font-size: 11.5px; color: var(--muted); margin-right: 8px; white-space: nowrap; }
+.flash { animation: flash 1.8s ease-out; }
+@keyframes flash { from { box-shadow: inset 4px 0 0 var(--ready); background-color: var(--ready-soft); } to { box-shadow: inset 4px 0 0 transparent; } }
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 var(--accent-soft); } 60% { box-shadow: 0 0 0 9px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
+
+/* Side panels */
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 10px; min-width: 0; }
+.sub-h { margin: 0; font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.items, .log { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.item { display: grid; gap: 4px; padding-bottom: 12px; border-bottom: 1px solid var(--line); scroll-margin-top: 24px; border-radius: 4px; }
+.item:last-child { border-bottom: 0; padding-bottom: 0; }
+.item-top { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; }
+.item-code { font-family: var(--font-mono); font-weight: 500; font-size: 13px; }
+.wv-chip { font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+.item p { margin: 0; font-size: 14px; }
+.item .res { color: var(--muted); font-size: 13px; }
+.item.settled p:not(.res) { color: var(--muted); }
+.log li { display: grid; gap: 2px; font-size: 14px; }
+.log .when { font-family: var(--font-mono); font-size: 11.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.log .wv { font-family: var(--font-mono); font-size: 11.5px; color: var(--accent); margin-left: 8px; }
+.empty { background: var(--surface); border: 1px dashed var(--line); border-radius: 10px; padding: 22px 18px; color: var(--muted); }
+.empty strong { color: var(--ink); font-family: var(--font-display); font-size: 18px; font-weight: 600; display: block; margin-bottom: 4px; }
+.placeholder { color: var(--muted); font-size: 14px; margin: 0; }
+footer { color: var(--muted); font-size: 13px; max-width: 80ch; }
+
+@media (max-width: 900px) {
+  .main, .now { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 480px) {
+  .line > li { padding-right: 12px; grid-template-columns: 46px minmax(0, 1fr); }
+  .line > li::before, .line > li::after { left: 21px; }
+  .facts { grid-template-columns: minmax(0, 1fr); gap: 0 0; }
+  .facts dt { padding-top: 6px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+
+<div class="wrap">
+  <header class="head">
+    <div class="eyebrow" id="rm-eyebrow">{{EYEBROW}}</div>
+    <h1 id="rm-title">{{TITLE}}</h1>
+    <p class="summary" id="rm-summary" hidden></p>
+    <div class="refs" id="rm-refs"></div>
+  </header>
+
+  <section class="overview" aria-labelledby="rm-ov-h">
+    <div class="sec-head">
+      <h2 id="rm-ov-h">The route</h2>
+      <p class="sec-sub" id="rm-ov-sub">Each station is a phase; each dot under it is one step.</p>
+    </div>
+    <div class="ov-frame">
+      <div class="ov-scroll" id="rm-ov-scroll">
+        <ol class="stations" id="rm-stations">
+          <li class="st"><p class="placeholder">The phases and their steps appear here as stations and dots.</p></li>
+        </ol>
+      </div>
+    </div>
+    <ul class="legend" aria-label="Legend">
+      <li><span class="lg done"></span>Done</li>
+      <li><span class="lg here"></span>You are here</li>
+      <li><span class="lg"></span>Still to do</li>
+      <li><span class="lg blocked"></span>Blocked or failed</li>
+      <li><span class="lg-line"></span>Travelled</li>
+      <li><span class="lg-line dash"></span>Ahead</li>
+    </ul>
+  </section>
+
+  <section class="now" aria-label="Where we are">
+    <article class="card past" id="rm-now-past"><div class="k">Last done</div><p class="placeholder">The most recent finished step appears here.</p></article>
+    <article class="card here" id="rm-now-here" aria-live="polite"><div class="k">You are here</div><p class="placeholder">Finding the current step…</p></article>
+    <article class="card ahead" id="rm-now-ahead"><div class="k">Coming up</div><p class="placeholder">The next steps appear here.</p></article>
+  </section>
+
+  <div class="main">
+    <section class="col" aria-labelledby="rm-line-h">
+      <h2 id="rm-line-h">Every phase and step, in order</h2>
+      <ol class="line" id="rm-line">
+        <li class="empty"><strong>The full route loads here.</strong>Each phase with what it is for, then each of its steps: who owns it, its status and what happened.</li>
+      </ol>
+    </section>
+    <aside class="col" aria-label="Gates, decisions and activity">
+      <h2>Gates and decisions</h2>
+      <div class="panel" id="rm-gates"><p class="placeholder">Open decisions and anything that holds up a phase appear here.</p></div>
+      <h2>Activity</h2>
+      <div class="panel" id="rm-log"><p class="placeholder">Each finished step is logged here with its time.</p></div>
+    </aside>
+  </div>
+
+  <footer id="rm-foot">Select a station or a dot to jump to it.</footer>
+</div>
+
+<script type="application/json" id="rm-data">null</script>
+<script>
+(function () {
+  "use strict";
+  /* Data comes from the JSON block above (static page) or, when that block is null, from the
+     artifact's db: doc meta/summary and collections phases, steps, gates, activity (live page). */
+  var $ = function (id) { return document.getElementById(id); };
+  var esc = function (s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  };
+  var STATUS = { done: "Done", active: "In progress", ready: "Ready", blocked: "Blocked", planned: "Planned", todo: "To do",
+                 skipped: "Skipped", failed: "Failed", open: "Open", decided: "Decided", dropped: "Dropped", next: "Up next" };
+  var TONES = { accent: 1, amber: 1, green: 1, red: 1, ink: 1 };
+  var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  var state = { meta: {}, phases: [], steps: [], gates: [], activity: [] };
+  var got = { meta: false, phases: false, steps: false, gates: false, activity: false };
+  var collapsed = null;            // phase ids whose steps are hidden; set on the first full render
+  var showSettled = false, showAllLog = false, arrived = false, offline = false;
+
+  function meta() { return state.meta || {}; }
+  function list(v) { return Array.isArray(v) ? v.filter(function (x) { return x && typeof x === "object"; }) : []; }
+  function strings(v) { return Array.isArray(v) ? v.filter(function (x) { return x != null && x !== ""; }) : []; }
+  function plural(s) {
+    if (/[^aeiou]y$/i.test(s)) return s.slice(0, -1) + "ies";
+    if (/(s|x|z|ch|sh)$/i.test(s)) return s + "es";
+    return s + "s";
+  }
+  function noun(kind, n) {
+    var m = meta(), one = (kind === "phase" ? m.phaseNoun : m.stepNoun) || kind;
+    if (n === 1) return one;
+    return (kind === "phase" ? m.phaseNounPlural : m.stepNounPlural) || plural(one);
+  }
+  var fmtCache = {};
+  function formatter(dateOnly) {
+    var tz = meta().timezone || "", key = tz + (dateOnly ? "|d" : "|t");
+    if (!fmtCache[key]) {
+      var o = dateOnly ? { month: "short", day: "numeric", timeZone: "UTC" }
+                       : { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23", timeZoneName: "short" };
+      if (tz && !dateOnly) o.timeZone = tz;
+      try { fmtCache[key] = new Intl.DateTimeFormat("en-US", o); }
+      catch (e) { delete o.timeZone; fmtCache[key] = new Intl.DateTimeFormat("en-US", o); }
+    }
+    return fmtCache[key];
+  }
+  function when(v) {
+    if (!v) return "";
+    var s = String(v), dateOnly = /^\d{4}-\d{2}-\d{2}$/.test(s);
+    var d = new Date(dateOnly ? s + "T00:00:00Z" : s);
+    return isNaN(d.getTime()) ? esc(s) : esc(formatter(dateOnly).format(d));
+  }
+  function stamp(v) { var t = new Date(String(v || "")).getTime(); return isNaN(t) ? 0 : t; }
+  function tzLabel() {
+    try {
+      var o = { timeZoneName: "short" };
+      if (meta().timezone) o.timeZone = meta().timezone;
+      var p = new Intl.DateTimeFormat("en-US", o).formatToParts(new Date()).filter(function (x) { return x.type === "timeZoneName"; })[0];
+      return p ? p.value : "";
+    } catch (e) { return ""; }
+  }
+  function safeHref(h) { return typeof h === "string" && /^https?:\/\//i.test(h) ? h : ""; }
+  function extLink(href, text) {
+    var h = safeHref(href);
+    return h ? '<a href="' + esc(h) + '" target="_blank" rel="noopener">' + esc(text) + "</a>" : esc(text);
+  }
+  function ownerInfo(k) { var o = (meta().owners || {})[k]; return o && typeof o === "object" ? o : null; }
+  function ownerName(k) { var o = ownerInfo(k); return (o && o.label) || k || ""; }
+  function who(k) {
+    if (!k) return "";
+    var o = ownerInfo(k), tone = o && TONES[o.tone] ? " t-" + o.tone : "";
+    return '<span class="who' + tone + '">' + esc(ownerName(k)) + "</span>";
+  }
+  function pill(k) { k = k || "planned"; return '<span class="pill ' + esc(k) + '">' + esc(STATUS[k] || k) + "</span>"; }
+  function settledStatus(k) { return k === "done" || k === "skipped"; }
+  function byOrder(a, b) {
+    var d = (Number(a.order) || 0) - (Number(b.order) || 0);
+    return d || String(a.id || "").localeCompare(String(b.id || ""), undefined, { numeric: true });
+  }
+  function link(id, text) { return '<a class="nid" href="#' + esc(id) + '" data-node="' + esc(id) + '">' + esc(text) + "</a>"; }
+
+  /* A phase with steps takes its status from them unless one is set; a phase without steps is one node itself. */
+  function phaseStatus(p, steps) {
+    if (p.status) return p.status;
+    if (!steps.length) return "planned";
+    var ks = steps.map(function (s) { return s.status || "todo"; });
+    var n = ks.filter(settledStatus).length;
+    if (n === ks.length) return "done";
+    if (ks.indexOf("blocked") !== -1 || ks.indexOf("failed") !== -1) return "blocked";
+    if (n > 0 || ks.indexOf("active") !== -1) return "active";
+    if (ks.indexOf("ready") !== -1) return "ready";
+    return "planned";
+  }
+
+  function model() {
+    var phases = state.phases.slice().sort(byOrder), byPhase = {}, status = {};
+    phases.forEach(function (p) { byPhase[p.id] = []; });
+    state.steps.forEach(function (s) { if (byPhase[s.phase]) byPhase[s.phase].push(s); });
+    phases.forEach(function (p) { byPhase[p.id].sort(byOrder); status[p.id] = phaseStatus(p, byPhase[p.id]); });
+    var route = [];
+    phases.forEach(function (p) {
+      var st = byPhase[p.id];
+      if (st.length) st.forEach(function (s, i) { route.push({ step: s, phase: p, n: i + 1, status: s.status || "todo" }); });
+      else route.push({ step: null, phase: p, n: 0, status: status[p.id] });
+    });
+    var cur = route.filter(function (x) { return x.status === "active"; })[0] ||
+              route.filter(function (x) { return !settledStatus(x.status); })[0] || null;
+    var curIdx = cur ? route.indexOf(cur) : route.length;
+    var done = route.filter(function (x) { return x.status === "done"; });
+    var timed = done.filter(function (x) { return x.step && stamp(x.step.at); });
+    var lastDone = timed.length ? timed.sort(function (a, b) { return stamp(b.step.at) - stamp(a.step.at); })[0]
+      : (done.filter(function (x) { return route.indexOf(x) < curIdx; }).pop() || done[done.length - 1] || null);
+    return { phases: phases, byPhase: byPhase, status: status, route: route, cur: cur, curIdx: curIdx, lastDone: lastDone,
+             curPhaseIdx: cur ? phases.indexOf(cur.phase) : Infinity, upcoming: cur ? route.slice(curIdx + 1, curIdx + 4) : [] };
+  }
+  function nodeId(x) { return x.step ? x.step.id : x.phase.id; }
+  function nodeCode(x) { return x.step ? (x.phase.code || "") + " · " + x.n : (x.phase.code || ""); }
+  function nodeLabel(x) { return x.step ? x.step.label : x.phase.title; }
+  function nodeOwner(x) { return x.step ? x.step.owner : x.phase.owner; }
+  function openGates(p) {
+    return state.gates.filter(function (g) {
+      var ph = strings(g.phases);
+      return (g.status || "open") === "open" && (ph.indexOf(p.code) !== -1 || ph.indexOf(p.id) !== -1);
+    }).sort(byOrder);
+  }
+
+  function renderHead() {
+    var m = meta();
+    if (m.title) $("rm-title").textContent = m.title;
+    if (m.eyebrow) $("rm-eyebrow").textContent = m.eyebrow;
+    var sm = $("rm-summary");
+    sm.textContent = m.summary || "";
+    sm.hidden = !m.summary;
+    var refs = list(m.refs).map(function (r) { return "<span>" + esc(r.label) + " <b>" + extLink(r.href, r.value) + "</b></span>"; });
+    if (m.updatedAt) refs.push("<span>Updated <b>" + when(m.updatedAt) + "</b></span>");
+    $("rm-refs").innerHTML = refs.join("");
+    $("rm-ov-sub").textContent = "Each station is a " + noun("phase", 1) + "; each dot under it is one " + noun("step", 1) + ".";
+    $("rm-line-h").textContent = "Every " + noun("phase", 1) + " and " + noun("step", 1) + ", in order";
+    var tz = tzLabel();
+    $("rm-foot").textContent = [tz ? "Times are " + tz + "." : "", m.footer || "", "Select a station or a dot to jump to it."].filter(Boolean).join(" ");
+  }
+
+  function renderOverview(M) {
+    var steps = M.route.filter(function (x) { return x.step; });
+    var stepsDone = steps.filter(function (x) { return settledStatus(x.status); }).length;
+    var phasesDone = M.phases.filter(function (p) { return settledStatus(M.status[p.id]); }).length;
+    var parts = [];
+    if (steps.length) parts.push("<b>" + stepsDone + " of " + steps.length + "</b> " + esc(noun("step", steps.length)) + " done");
+    parts.push("<b>" + phasesDone + " of " + M.phases.length + "</b> " + esc(noun("phase", M.phases.length)) + " done");
+    if (M.cur) parts.push("now in <b>" + esc([M.cur.phase.code, M.cur.phase.short || M.cur.phase.title].filter(Boolean).join(" ")) + "</b>");
+    $("rm-ov-sub").innerHTML = parts.join(" · ");
+    $("rm-stations").innerHTML = M.phases.map(function (p, idx) {
+      var steps = M.byPhase[p.id], st = M.status[p.id];
+      var n = steps.filter(function (s) { return settledStatus(s.status); }).length;
+      var here = !!(M.cur && M.cur.phase === p);
+      var cls = ["st", st, idx <= M.curPhaseIdx ? "reached" : "", idx < M.curPhaseIdx ? "passed" : "", here ? "here" : ""].join(" ");
+      var dots = steps.map(function (s, i) {
+        var isCur = M.cur && M.cur.step === s, k = isCur ? "here" : (s.status || "todo");
+        var text = (p.code || "") + " · " + (i + 1) + " · " + (isCur ? "You are here" : (STATUS[s.status] || "To do")) + " · " + (s.label || "");
+        return '<a class="dot ' + esc(k) + '" href="#' + esc(s.id) + '" data-node="' + esc(s.id) + '" title="' + esc(text) + '" aria-label="' + esc(text) + '"></a>';
+      }).join("");
+      var aria = (p.code || "") + ", " + (p.title || p.short || "") + ", " + (STATUS[st] || st);
+      return '<li class="' + cls + '">' +
+        '<span class="flag">You are here</span>' +
+        '<div class="track"><a class="hub" href="#' + esc(p.id) + '" data-node="' + esc(p.id) + '" aria-label="' + esc(aria) + '">' + esc(p.code || "") + "</a></div>" +
+        '<a class="st-name" href="#' + esc(p.id) + '" data-node="' + esc(p.id) + '">' + esc(p.short || p.title || "") + "</a>" +
+        '<span class="st-meta">' + (p.when ? esc(p.when) + "<br>" : "") + (steps.length ? n + " of " + steps.length + " done" : esc(STATUS[st] || st)) + "</span>" +
+        (dots ? '<div class="dots">' + dots + "</div>" : "") + "</li>";
+    }).join("");
+  }
+
+  function renderNow(M) {
+    var m = meta(), past = M.lastDone, c = M.cur;
+    $("rm-now-past").innerHTML = '<div class="k">Last done</div>' + (past ?
+      link(nodeId(past), nodeCode(past)) +
+      '<p class="nlabel clamp">' + esc(nodeLabel(past)) + "</p>" +
+      (past.step && past.step.result ? '<p class="nresult clamp">' + esc(past.step.result) + "</p>" : "") +
+      '<p class="nmeta">' + (past.step && past.step.at ? "<span>" + when(past.step.at) + "</span>" : "") + who(nodeOwner(past)) + "</p>"
+      : '<p class="placeholder">Nothing finished yet.</p>');
+    if (!c) {
+      $("rm-now-here").innerHTML = '<div class="k">You are here</div><p class="nlabel">Every ' + esc(noun("step", 1)) + " on the route is done.</p>" +
+        (m.nextAction ? '<p class="next-action">' + esc(m.nextAction) + "</p>" : "");
+    } else {
+      $("rm-now-here").innerHTML = '<div class="k">You are here</div>' +
+        link(nodeId(c), nodeCode(c) + (c.step ? " · " + (c.phase.short || c.phase.title || "") : "")) +
+        '<p class="nlabel">' + esc(nodeLabel(c)) + "</p>" +
+        '<p class="nmeta">' + pill(c.status === "todo" || c.status === "planned" ? "next" : c.status) + who(nodeOwner(c)) +
+        (c.step && c.step.due ? '<span class="due">Due ' + esc(c.step.due) + "</span>" : "") +
+        (m.waitingOn ? "<span>Waiting on <b>" + esc(ownerName(m.waitingOn)) + "</b></span>" : "") + "</p>" +
+        (m.nextAction ? '<p class="next-action">' + esc(m.nextAction) + "</p>" : "");
+    }
+    var up = M.upcoming, nextPhase = c ? (M.phases[M.phases.indexOf(c.phase) + 1] || null) : null;
+    var showThen = nextPhase && (!up.length || up[up.length - 1].phase === c.phase);
+    $("rm-now-ahead").innerHTML = '<div class="k">Coming up</div>' +
+      (up.length ? '<ol class="ahead-list">' + up.map(function (x) {
+        return "<li>" + link(nodeId(x), nodeCode(x)) + '<span class="clamp">' + esc(nodeLabel(x)) + "</span></li>";
+      }).join("") + "</ol>" : '<p class="placeholder">No more ' + esc(noun("step", 2)) + ".</p>") +
+      (showThen ? '<p class="then">Then <b>' + esc([nextPhase.code, nextPhase.short || nextPhase.title].filter(Boolean).join(" · ")) + "</b>" +
+        (nextPhase.waitsOn ? ". Waits on: " + esc(nextPhase.waitsOn) : "") + "</p>" : "");
+  }
+
+  function phaseRow(M, p, cls) {
+    var steps = M.byPhase[p.id], st = M.status[p.id];
+    var n = steps.filter(function (s) { return settledStatus(s.status); }).length;
+    var pct = steps.length ? Math.round(n * 100 / steps.length) : 0;
+    var isHere = !!(M.cur && !M.cur.step && M.cur.phase === p);
+    var gates = openGates(p), scope = strings(p.scope), facts = "";
+    if (scope.length) facts += "<dt>Scope</dt><dd><ul>" + scope.map(function (s) { return "<li>" + esc(s) + "</li>"; }).join("") + "</ul></dd>";
+    if (p.doneWhen) facts += "<dt>Done when</dt><dd>" + esc(p.doneWhen) + "</dd>";
+    if (p.waitsOn) facts += "<dt>Waits on</dt><dd>" + esc(p.waitsOn) + "</dd>";
+    if (gates.length) facts += "<dt>Open gates</dt><dd>" + gates.map(function (g) {
+      return '<a class="gate" href="#gate-' + esc(g.id) + '" data-node="gate-' + esc(g.id) + '" title="' + esc(g.text) + '">' + esc(g.code || g.id) + "</a>";
+    }).join(" ") + "</dd>";
+    if (p.owner) facts += "<dt>Lead</dt><dd>" + who(p.owner) + "</dd>";
+    if (p.statusNote) facts += "<dt>Status</dt><dd>" + esc(p.statusNote) + "</dd>";
+    if (p.ref) facts += '<dt>Ref</dt><dd class="mono">' + extLink(p.href, p.ref) + "</dd>";
+    var isCollapsed = collapsed.has(p.id);
+    var toggle = steps.length ? '<button class="toggle" type="button" data-toggle="' + esc(p.id) + '" aria-expanded="' + !isCollapsed + '">' +
+      (isCollapsed ? "Show its " + steps.length + " " + esc(noun("step", steps.length)) : "Hide its " + esc(noun("step", 2))) + "</button>" : "";
+    return '<li class="w-row ' + esc(st) + " " + cls.join(" ") + (isHere ? " here" : "") + '" id="' + esc(p.id) + '">' +
+      '<span class="hubnode" aria-hidden="true">' + esc(p.code || "") + "</span>" +
+      '<div class="w-body"><div class="w-eyebrow">' + [p.code, p.short, p.when].filter(Boolean).map(esc).join(" · ") + "</div>" +
+      '<div class="w-top"><h3>' + esc(p.title || p.short || "") + "</h3>" + pill(st) + (isHere ? '<span class="here-tag">You are here</span>' : "") + "</div>" +
+      (steps.length ? '<div class="progress"><span class="bar" aria-hidden="true"><span style="width:' + pct + '%"></span></span><span class="st-meta">' +
+        n + " of " + steps.length + " " + esc(noun("step", steps.length)) + " done</span></div>" : "") +
+      (p.purpose ? '<p class="w-purpose">' + esc(p.purpose) + "</p>" : "") +
+      (facts ? '<dl class="facts">' + facts + "</dl>" : "") + toggle + "</div></li>";
+  }
+
+  function stepRow(M, r, cls) {
+    var s = r.s, isCur = !!(M.cur && M.cur.step === s), k = s.status || "todo";
+    var mark = k === "done" ? "✓" : (k === "blocked" || k === "failed") ? "!" : "";
+    return '<li class="s-row ' + esc(isCur ? "here" : k) + " " + cls.join(" ") + '" id="' + esc(s.id) + '">' +
+      '<span class="stop" aria-hidden="true">' + mark + "</span>" +
+      '<div class="s-body"><div class="s-top"><span class="sid">' + esc((r.p.code || "") + " · " + r.n) + "</span>" + who(s.owner) +
+      (isCur ? '<span class="here-tag">You are here</span>' : "") + (k !== "todo" ? pill(k) : "") +
+      (s.due && !settledStatus(k) ? '<span class="due">Due ' + esc(s.due) + "</span>" : "") + "</div>" +
+      '<p class="s-label">' + esc(s.label) + "</p>" +
+      (s.result || s.at ? '<p class="s-result">' + (s.at ? "<time>" + when(s.at) + "</time>" : "") + esc(s.result || "") + "</p>" : "") +
+      "</div></li>";
+  }
+
+  function renderLine(M) {
+    if (!collapsed) {
+      collapsed = new Set();
+      M.phases.forEach(function (p) { if (M.status[p.id] === "done" && !(M.cur && M.cur.phase === p)) collapsed.add(p.id); });
+    }
+    var rows = [];
+    M.phases.forEach(function (p) {
+      rows.push({ t: "p", p: p });
+      M.byPhase[p.id].forEach(function (s, i) { rows.push({ t: "s", s: s, p: p, n: i + 1 }); });
+    });
+    var hereIdx = rows.length - 1;
+    if (M.cur) rows.forEach(function (r, i) {
+      if ((r.t === "s" && r.s === M.cur.step) || (r.t === "p" && !M.cur.step && r.p === M.cur.phase)) hereIdx = i;
+    });
+    var visible = rows.map(function (r, i) { return { r: r, i: i }; }).filter(function (x) { return x.r.t === "p" || !collapsed.has(x.r.p.id); });
+    $("rm-line").innerHTML = visible.map(function (x, vi) {
+      var next = visible[vi + 1], cls = [];
+      if (vi === 0) cls.push("first");
+      if (vi === visible.length - 1) cls.push("last");
+      if (x.i <= hereIdx) cls.push("up-on");
+      if (next && next.i <= hereIdx) cls.push("down-on");
+      return x.r.t === "p" ? phaseRow(M, x.r.p, cls) : stepRow(M, x.r, cls);
+    }).join("");
+  }
+
+  function gateHtml(g, settled) {
+    var ph = strings(g.phases);
+    return '<li class="item' + (settled ? " settled" : "") + '" id="gate-' + esc(g.id) + '"><div class="item-top"><span class="item-code">' + esc(g.code || g.id) + "</span>" +
+      pill(g.status || "open") + who(g.owner) + (ph.length ? '<span class="wv-chip">' + esc(ph.join(" · ")) + "</span>" : "") + "</div>" +
+      "<p>" + esc(g.text) + "</p>" + (g.resolution ? '<p class="res">' + esc(g.resolution) + "</p>" : "") + "</li>";
+  }
+  function renderGates() {
+    if (!got.gates) return;
+    var open = state.gates.filter(function (g) { return (g.status || "open") === "open"; }).sort(byOrder);
+    var settled = state.gates.filter(function (g) { return (g.status || "open") !== "open"; }).sort(byOrder);
+    if (!open.length && !settled.length) {
+      $("rm-gates").innerHTML = '<p class="placeholder">No open decisions. Anything that holds up a ' + esc(noun("phase", 1)) + " shows here.</p>";
+      return;
+    }
+    $("rm-gates").innerHTML = '<p class="sub-h">Open · ' + open.length + "</p>" +
+      (open.length ? '<ul class="items">' + open.map(function (g) { return gateHtml(g, false); }).join("") + "</ul>" : '<p class="placeholder">Nothing is holding up the route.</p>') +
+      (settled.length ? '<button class="toggle" type="button" data-more="gates" aria-expanded="' + showSettled + '">' +
+        (showSettled ? "Hide the settled ones" : "Show " + settled.length + " settled") + "</button>" +
+        (showSettled ? '<ul class="items">' + settled.map(function (g) { return gateHtml(g, true); }).join("") + "</ul>" : "") : "");
+  }
+
+  function renderLog() {
+    if (!got.activity) return;
+    var entries = state.activity.filter(function (e) { return e.text; }).sort(function (a, b) { return stamp(b.at) - stamp(a.at); });
+    if (!entries.length) { $("rm-log").innerHTML = '<p class="placeholder">Finished ' + esc(noun("step", 2)) + " and other changes are logged here.</p>"; return; }
+    var shown = showAllLog ? entries : entries.slice(0, 8);
+    $("rm-log").innerHTML = '<ul class="log">' + shown.map(function (e) {
+      return '<li><span><span class="when">' + when(e.at) + "</span>" + (e.phase ? '<span class="wv">' + esc(e.phase) + "</span>" : "") + "</span><span>" + esc(e.text) + "</span></li>";
+    }).join("") + "</ul>" +
+      (entries.length > 8 ? '<button class="toggle" type="button" data-more="log" aria-expanded="' + showAllLog + '">' + (showAllLog ? "Show the latest 8" : "Show all " + entries.length) + "</button>" : "");
+  }
+
+  function emptyRoute() {
+    $("rm-ov-sub").textContent = "No " + noun("phase", 2) + " yet.";
+    $("rm-stations").innerHTML = '<li class="st"><p class="placeholder">The ' + esc(noun("phase", 2)) + " appear here once they are added.</p></li>";
+    $("rm-now-here").innerHTML = '<div class="k">You are here</div><p class="placeholder">Nothing on the route yet.</p>';
+    $("rm-line").innerHTML = '<li class="empty"><strong>This roadmap has no ' + esc(noun("phase", 2)) + " yet.</strong>Ask Claude to add them with their " +
+      esc(noun("step", 2)) + "; they appear here as soon as they are saved.</li>";
+  }
+
+  function render() {
+    if (offline) return;
+    renderHead();
+    if (!(got.phases && got.steps)) return;
+    var M = model();
+    renderGates(); renderLog();
+    if (!M.phases.length) { emptyRoute(); return; }
+    renderOverview(M); renderNow(M); renderLine(M);
+    if (!arrived) {
+      arrived = true;
+      var sc = $("rm-ov-scroll"), hs = sc.querySelector(".st.here");
+      if (hs && sc.scrollWidth > sc.clientWidth) sc.scrollLeft = Math.max(0, hs.offsetLeft - (sc.clientWidth - hs.offsetWidth) / 2);
+      var h = "";
+      try { h = decodeURIComponent((location.hash || "").slice(1)); } catch (e) { h = ""; }
+      if (h) goTo(h);
+    }
+  }
+
+  function goTo(id) {
+    var s = state.steps.filter(function (x) { return x.id === id; })[0];
+    if (s && collapsed && collapsed.has(s.phase)) { collapsed.delete(s.phase); renderLine(model()); }
+    var g = state.gates.filter(function (x) { return "gate-" + x.id === id; })[0];
+    if (g && (g.status || "open") !== "open" && !showSettled) { showSettled = true; renderGates(); }
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "center" });
+    el.classList.remove("flash");
+    void el.offsetWidth;
+    el.classList.add("flash");
+  }
+
+  document.addEventListener("click", function (ev) {
+    var t = ev.target;
+    if (!t || !t.closest) return;
+    var n = t.closest("[data-node]");
+    if (n) { ev.preventDefault(); goTo(n.getAttribute("data-node")); return; }
+    var tg = t.closest("[data-toggle]");
+    if (tg && collapsed) {
+      var id = tg.getAttribute("data-toggle");
+      if (collapsed.has(id)) collapsed.delete(id); else collapsed.add(id);
+      renderLine(model());
+      var again = document.querySelector('[data-toggle="' + (window.CSS && CSS.escape ? CSS.escape(id) : id) + '"]');
+      if (again) again.focus();
+      return;
+    }
+    var more = t.closest("[data-more]");
+    if (more) {
+      if (more.getAttribute("data-more") === "log") { showAllLog = !showAllLog; renderLog(); }
+      else { showSettled = !showSettled; renderGates(); }
+    }
+  });
+
+  function unavailable() {
+    offline = true;
+    $("rm-ov-sub").textContent = "Live status needs a signed-in claude.ai view.";
+    $("rm-stations").innerHTML = '<li class="st"><p class="placeholder">Open this roadmap in claude.ai to see the route.</p></li>';
+    $("rm-now-here").innerHTML = '<div class="k">You are here</div><p class="placeholder">Open the roadmap in claude.ai to see the current step.</p>';
+    $("rm-line").innerHTML = "<li class=\"empty\"><strong>Live status isn't available in this view.</strong>This roadmap reads its phases and steps from the page's own database, which needs a signed-in claude.ai view.</li>";
+  }
+  function badData() {
+    $("rm-line").innerHTML = '<li class="empty"><strong>The roadmap data could not be read.</strong>The JSON block near the end of this page has a syntax error. Fix it and publish the page again.</li>';
+    $("rm-now-here").innerHTML = '<div class="k">You are here</div><p class="placeholder">No data.</p>';
+  }
+  function docs(q) { return q.docs.map(function (d) { var o = Object.assign({}, d.data()); o.id = d.id; return o; }); }
+
+  async function startLive() {
+    var db = null;
+    try { db = window.claude && typeof window.claude.use === "function" ? await window.claude.use("db") : null; } catch (e) { db = null; }
+    if (!db) { unavailable(); return; }
+    var onErr = function (e) {
+      var c = e && e.code;
+      if (c === "revoked" || c === "not_granted" || c === "capability_disabled" || c === "capability_removed") unavailable();
+    };
+    db.doc("meta/summary").onSnapshot(function (s) { state.meta = s.exists ? (s.data() || {}) : {}; got.meta = true; render(); }, onErr);
+    db.collection("phases").onSnapshot(function (q) { state.phases = docs(q); got.phases = true; render(); }, onErr);
+    db.collection("steps").onSnapshot(function (q) { state.steps = docs(q); got.steps = true; render(); }, onErr);
+    db.collection("gates").onSnapshot(function (q) { state.gates = docs(q); got.gates = true; render(); }, onErr);
+    db.collection("activity").onSnapshot(function (q) { state.activity = docs(q); got.activity = true; renderLog(); }, onErr);
+  }
+
+  var seed, raw = ($("rm-data") || {}).textContent || "";
+  try { seed = JSON.parse(raw.trim() || "null"); } catch (e) { seed = undefined; }
+  if (seed === undefined) badData();
+  else if (seed && typeof seed === "object") {
+    state.meta = seed.meta && typeof seed.meta === "object" ? seed.meta : {};
+    state.phases = list(seed.phases); state.steps = list(seed.steps); state.gates = list(seed.gates); state.activity = list(seed.activity);
+    got = { meta: true, phases: true, steps: true, gates: true, activity: true };
+    render();
+  } else startLive();
+})();
+</script>
