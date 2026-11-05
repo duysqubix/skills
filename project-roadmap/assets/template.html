@@ -412,6 +412,11 @@ footer { color: var(--muted); font-size: 13px; max-width: 80ch; }
       return (g.status || "open") === "open" && (ph.indexOf(p.code) !== -1 || ph.indexOf(p.id) !== -1);
     }).sort(byOrder);
   }
+  /* The name of the phase a gate or log entry names by code or id, so the page never shows a bare code. */
+  function phaseName(c) {
+    var p = state.phases.filter(function (x) { return x.code === c || x.id === c; })[0];
+    return p ? (p.short || p.title || c) : c;
+  }
 
   function renderHead() {
     var m = meta();
@@ -497,9 +502,9 @@ footer { color: var(--muted); font-size: 13px; max-width: 80ch; }
     if (scope.length) facts += "<dt>Scope</dt><dd><ul>" + scope.map(function (s) { return "<li>" + esc(s) + "</li>"; }).join("") + "</ul></dd>";
     if (p.doneWhen) facts += "<dt>Done when</dt><dd>" + esc(p.doneWhen) + "</dd>";
     if (p.waitsOn) facts += "<dt>Waits on</dt><dd>" + esc(p.waitsOn) + "</dd>";
-    if (gates.length) facts += "<dt>Open gates</dt><dd>" + gates.map(function (g) {
-      return '<a class="gate" href="#gate-' + esc(g.id) + '" data-node="gate-' + esc(g.id) + '" title="' + esc(g.text) + '">' + esc(g.code || g.id) + "</a>";
-    }).join(" ") + "</dd>";
+    if (gates.length) facts += "<dt>Open gates</dt><dd><ul>" + gates.map(function (g) {
+      return '<li><a class="gate" href="#gate-' + esc(g.id) + '" data-node="gate-' + esc(g.id) + '">' + esc(g.code || g.id) + "</a> " + esc(g.text) + "</li>";
+    }).join("") + "</ul></dd>";
     if (p.owner) facts += "<dt>Lead</dt><dd>" + who(p.owner) + "</dd>";
     if (p.statusNote) facts += "<dt>Status</dt><dd>" + esc(p.statusNote) + "</dd>";
     if (p.ref) facts += '<dt>Ref</dt><dd class="mono">' + extLink(p.href, p.ref) + "</dd>";
@@ -557,7 +562,7 @@ footer { color: var(--muted); font-size: 13px; max-width: 80ch; }
   function gateHtml(g, settled) {
     var ph = strings(g.phases);
     return '<li class="item' + (settled ? " settled" : "") + '" id="gate-' + esc(g.id) + '"><div class="item-top"><span class="item-code">' + esc(g.code || g.id) + "</span>" +
-      pill(g.status || "open") + who(g.owner) + (ph.length ? '<span class="wv-chip">' + esc(ph.join(" · ")) + "</span>" : "") + "</div>" +
+      pill(g.status || "open") + who(g.owner) + (ph.length ? '<span class="wv-chip">' + esc(ph.map(phaseName).join(" · ")) + "</span>" : "") + "</div>" +
       "<p>" + esc(g.text) + "</p>" + (g.resolution ? '<p class="res">' + esc(g.resolution) + "</p>" : "") + "</li>";
   }
   function renderGates() {
@@ -576,12 +581,12 @@ footer { color: var(--muted); font-size: 13px; max-width: 80ch; }
   }
 
   function renderLog() {
-    if (!got.activity) return;
+    if (!got.activity || !got.phases) return; // log chips name phases, so wait for them
     var entries = state.activity.filter(function (e) { return e.text; }).sort(function (a, b) { return stamp(b.at) - stamp(a.at); });
     if (!entries.length) { $("rm-log").innerHTML = '<p class="placeholder">Finished ' + esc(noun("step", 2)) + " and other changes are logged here.</p>"; return; }
     var shown = showAllLog ? entries : entries.slice(0, 8);
     $("rm-log").innerHTML = '<ul class="log">' + shown.map(function (e) {
-      return '<li><span><span class="when">' + when(e.at) + "</span>" + (e.phase ? '<span class="wv">' + esc(e.phase) + "</span>" : "") + "</span><span>" + esc(e.text) + "</span></li>";
+      return '<li><span><span class="when">' + when(e.at) + "</span>" + (e.phase ? '<span class="wv">' + esc(phaseName(e.phase)) + "</span>" : "") + "</span><span>" + esc(e.text) + "</span></li>";
     }).join("") + "</ul>" +
       (entries.length > 8 ? '<button class="toggle" type="button" data-more="log" aria-expanded="' + showAllLog + '">' + (showAllLog ? "Show the latest 8" : "Show all " + entries.length) + "</button>" : "");
   }

@@ -56,7 +56,7 @@ A high-level roadmap is a handful of phases, each with a few checkable steps.
 **Steps**
 
 - Use 2 to 6 per phase for a high-level roadmap.
-- Each step is a milestone someone could tick off: verb first, under about 70 characters, with one owner. Write "Sign the vendor SOW", not "Contract stuff".
+- Each step is a milestone someone could tick off: verb first, under about 70 characters, with one owner. Write "Sign the builder's contract", not "Contract stuff".
 - Go down to every task only when the user wants step-by-step tracking, such as a cutover runbook.
 - A finished phase you only know the outcome of can have a single done step, or none. Don't invent its history.
 
@@ -68,7 +68,7 @@ A high-level roadmap is a handful of phases, each with a few checkable steps.
 
 **Gates and decisions**
 
-- A gate is anything that can hold a phase up. Code decisions D1, D2; approvals, fixes and deliveries G1, G2; and risks R1, R2. The `id` is the code in lower case (d1, g1, r1).
+- A gate is anything that can hold a phase up. Code decisions D1, D2; approvals, fixes and deliveries G1, G2; and risks R1, R2. The `id` is the code in lower case (d1, g1, r1). The code is only the gate's badge: in any text, name the gate by what it decides or waits for.
 - List the phase codes a gate holds up in `phases` (always a list, such as `["P3"]`). Open gates then also show on those phase rows.
 - Give a gate an `owner` when you know who decides or delivers it.
 - When one is settled, set `status` to `decided` or `done` and add a one-line `resolution` that says when.
@@ -109,6 +109,15 @@ Set `phaseNoun` and `stepNoun` to the words the people involved use; the page's 
 **Activity**
 
 Log only what really happened, each with a date or time. Start with the real events you know, such as an inventory finished on Oct 20, then add a final "Roadmap created." entry.
+
+**Plain words**
+
+People read the page cold: the user weeks from now, or someone who never saw this conversation. Every line of text has to make sense on its own.
+
+- Name things by what they are, not by their codes. The codes (P2, D1, G1) are badges the page draws, so keep them out of the text. Write "Decide how the range hood vents", not "Decide D1", and "Permit issued", not "G1 cleared".
+- Spell out abbreviations, or use the plain word: "statement of work", not "SOW"; "the first version", not "v1"; "the third layout draft", not "Layout v3". Keep an abbreviation only when it is the name people know the thing by.
+- Say what happened, not where it is filed. A ticket, bead, PR or commit id, a file path, an API route or an error code is never the point of a line: write "The city's permit site was down", not "HTTP 503". When an id helps someone look the thing up, put it in parentheses after the plain words, or in a `refs` chip.
+- Before you save, read each line as a stranger would. If it leans on the chat, rewrite it.
 
 ## 3. Write roadmap.json
 
@@ -219,7 +228,7 @@ The same changes apply in both modes. Live roadmaps write them to the database; 
 | Something removed | Delete the record |
 | Every change | A new activity entry (`at`, `text`, `phase`), plus `updatedAt`, `nextAction` and `waitingOn` in meta |
 
-Get the current time with `date -u +%Y-%m-%dT%H:%M:%SZ`. Write log entries short, factual and in the past tense, such as "Permit approved after 4 weeks." Once the log passes about 200 entries, remove the oldest.
+Get the current time with `date -u +%Y-%m-%dT%H:%M:%SZ`. Write log entries short, factual, in the past tense and in plain words (see **Plain words** above), such as "Permit approved after 4 weeks." Once the log passes about 200 entries, remove the oldest.
 
 **Live updates**
 
@@ -250,7 +259,7 @@ To give someone a file copy:
 
 Any session with the `ArtifactData` tool can keep a live roadmap current with the recipe above. Give an agent that is doing the work itself the artifact URL and an instruction like this one:
 
-"After each step, update the roadmap. Mark the step done with the time and a one-line result, add an activity entry, and refresh updatedAt and nextAction in meta/summary. Read each document's version first and pass it as if_version."
+"After each step, update the roadmap. Mark the step done with the time and a one-line result, add an activity entry, and refresh updatedAt and nextAction in meta/summary. Write every line in plain words for someone who never saw the work: no codes like D1, no ids, no shorthand. Read each document's version first and pass it as if_version."
 
 **Roadmaps not built from this template**
 
