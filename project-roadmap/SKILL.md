@@ -19,7 +19,7 @@ Every roadmap uses the same page, so the user can read any of them at a glance. 
 
 ## Two modes
 
-- **Live.** Use this whenever the Artifact tool is available and the user's capability roster includes `db`; the `artifact-capabilities` skill lists the roster. The page is published once with the `db` capability and reads everything from the artifact's database. You update it by writing rows with the `ArtifactData` tool, with no republish, and anyone with the link sees the change at once. This is what keeps a roadmap current as work moves.
+- **Live.** Use this whenever the Artifact tool is available and the user's capability roster includes `db`; the `artifact-capabilities` skill lists the roster. The page is published once with the `db` capability and reads everything from the artifact's database. You update it by writing rows with the `ArtifactData` tool, with no republish, and anyone with the link sees the change at once. When the You-are-here flag moves, an open page pops up a note saying what finished and where the flag is now. This is what keeps a roadmap current as work moves.
 - **Static.** The data is embedded in the page. Use this when there's no Artifact tool (a plain chat or a script), when `db` isn't offered, or when the user wants a standalone HTML file. You update it by editing `roadmap.json`, rebuilding, and publishing or sending the page again.
 
 ## 1. Gather

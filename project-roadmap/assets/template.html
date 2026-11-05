@@ -218,6 +218,14 @@ a.nid:hover { color: var(--accent); }
 .placeholder { color: var(--muted); font-size: 14px; margin: 0; }
 footer { color: var(--muted); font-size: 13px; max-width: 80ch; }
 
+/* Pop-up when the You-are-here flag moves. #rm-pop stays on the page, empty while closed, so screen readers announce the card when it arrives. */
+#rm-pop { position: fixed; right: 16px; bottom: 16px; z-index: 10; width: min(360px, calc(100vw - 32px)); }
+.pop { background: var(--surface); border: 2px solid var(--accent); border-radius: 10px; padding: 14px 16px; display: grid; gap: 6px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18); animation: pop-in 0.25s ease-out; }
+.pop .k { font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--accent); }
+.pop p { margin: 0; font-size: 14px; }
+.pop .acts { display: flex; gap: 8px; margin-top: 4px; }
+@keyframes pop-in { from { transform: translateY(12px); opacity: 0; } }
+
 @media (max-width: 900px) {
   .main, .now { grid-template-columns: minmax(0, 1fr); }
 }
@@ -284,6 +292,7 @@ footer { color: var(--muted); font-size: 13px; max-width: 80ch; }
   </div>
 
   <footer id="rm-foot">Select a station or a dot to jump to it.</footer>
+  <div id="rm-pop" role="status" aria-live="polite"></div>
 </div>
 
 <script type="application/json" id="rm-data">null</script>
@@ -307,6 +316,10 @@ footer { color: var(--muted); font-size: 13px; max-width: 80ch; }
   var got = { meta: false, phases: false, steps: false, gates: false, activity: false };
   var collapsed = null;            // phase ids whose steps are hidden; set on the first full render
   var showSettled = false, showAllLog = false, arrived = false, offline = false;
+  // At the last confirmed render: the node the flag sat on ("" once the route is done) and which nodes were settled.
+  // Then the nodes finished since the last pop-up, the pop-up's markup ("" while closed), and whether the live phases
+  // and steps are confirmed rather than a copy cached on an earlier visit.
+  var lastHere, wasSettled = new Map(), popDone = [], popHtml = "", fresh = { phases: false, steps: false };
 
   function meta() { return state.meta || {}; }
   function list(v) { return Array.isArray(v) ? v.filter(function (x) { return x && typeof x === "object"; }) : []; }
@@ -607,6 +620,7 @@ footer { color: var(--muted); font-size: 13px; max-width: 80ch; }
     renderGates(); renderLog();
     if (!M.phases.length) { emptyRoute(); return; }
     renderOverview(M); renderNow(M); renderLine(M);
+    if (fresh.phases && fresh.steps) track(M);
     if (!arrived) {
       arrived = true;
       var sc = $("rm-ov-scroll"), hs = sc.querySelector(".st.here");
@@ -630,10 +644,37 @@ footer { color: var(--muted); font-size: 13px; max-width: 80ch; }
     el.classList.add("flash");
   }
 
+  /* Pops up a note for whoever has the live page open when the You-are-here flag moves: what finished since the last
+     note, and where the flag sits now. It stays until closed and keeps itself current while open. When the flag's old
+     node left the route (deleted, or a phase that just got its steps), an edit moved it, not progress: no pop-up.
+     A finished route that gets work again (a step reopened or added) does pop up. */
+  function track(M) {
+    var ids = M.route.map(nodeId), c = M.cur, here = c ? nodeId(c) : "";
+    M.route.forEach(function (x, i) {
+      if (wasSettled.get(ids[i]) === false && settledStatus(x.status) && popDone.indexOf(ids[i]) < 0) popDone.push(ids[i]);
+    });
+    var open = popHtml || (lastHere !== undefined && here !== lastHere && (lastHere === "" || ids.indexOf(lastHere) >= 0));
+    lastHere = here;
+    wasSettled = new Map(M.route.map(function (x, i) { return [ids[i], settledStatus(x.status)]; }));
+    if (!open) return;
+    var html = '<div class="pop"><div class="k">Roadmap update</div>' +
+      M.route.filter(function (x, i) { return popDone.indexOf(ids[i]) >= 0 && settledStatus(x.status); }).map(function (x) {
+        return "<p>" + (x.status === "skipped" ? "Skipped" : "Done") + ": <b>" + esc(nodeLabel(x)) + "</b></p>";
+      }).join("") +
+      (c ? "<p>Now: <b>" + esc(nodeLabel(c)) + "</b>" + (c.step ? " · " + esc(c.phase.short || c.phase.title || "") : "") + "</p>"
+        : "<p>Every " + esc(noun("step", 1)) + " on the route is done.</p>") +
+      '<div class="acts">' + (c ? '<button type="button" class="toggle" data-node="' + esc(here) + '">Show me</button>' : "") +
+      '<button type="button" class="toggle">Close</button></div></div>';
+    if (html !== popHtml) $("rm-pop").innerHTML = popHtml = html; // only real changes, so screen readers don't hear repeats
+  }
+  function closePop() { $("rm-pop").innerHTML = popHtml = ""; popDone = []; }
+  document.addEventListener("keydown", function (ev) { if (ev.key === "Escape" && popHtml) closePop(); });
+
   document.addEventListener("click", function (ev) {
     var t = ev.target;
     if (!t || !t.closest) return;
     var n = t.closest("[data-node]");
+    if (t.closest("#rm-pop button")) closePop(); // both buttons close it; "Show me" then still goes to its step
     if (n) { ev.preventDefault(); goTo(n.getAttribute("data-node")); return; }
     var tg = t.closest("[data-toggle]");
     if (tg && collapsed) {
@@ -673,8 +714,9 @@ footer { color: var(--muted); font-size: 13px; max-width: 80ch; }
       if (c === "revoked" || c === "not_granted" || c === "capability_disabled" || c === "capability_removed") unavailable();
     };
     db.doc("meta/summary").onSnapshot(function (s) { state.meta = s.exists ? (s.data() || {}) : {}; got.meta = true; render(); }, onErr);
-    db.collection("phases").onSnapshot(function (q) { state.phases = docs(q); got.phases = true; render(); }, onErr);
-    db.collection("steps").onSnapshot(function (q) { state.steps = docs(q); got.steps = true; render(); }, onErr);
+    // ponytail: fromCache also marks a collection too large to read whole, so such a roadmap never pops up; fine at roadmap sizes.
+    db.collection("phases").onSnapshot(function (q) { state.phases = docs(q); got.phases = true; fresh.phases = !(q.metadata && q.metadata.fromCache); render(); }, onErr);
+    db.collection("steps").onSnapshot(function (q) { state.steps = docs(q); got.steps = true; fresh.steps = !(q.metadata && q.metadata.fromCache); render(); }, onErr);
     db.collection("gates").onSnapshot(function (q) { state.gates = docs(q); got.gates = true; render(); }, onErr);
     db.collection("activity").onSnapshot(function (q) { state.activity = docs(q); got.activity = true; renderLog(); }, onErr);
   }
