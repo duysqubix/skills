@@ -1,9 +1,9 @@
 ---
 name: reference-product-management
-description: Product Management family (69 skills) — discovery, strategy, execution, research, analytics, GTM, marketing. Loaded from using-agent-skills when a task is PM-flavored.
+description: Product Management family (70 skills) — discovery, strategy, execution, research, analytics, GTM, marketing. Loaded from using-agent-skills when a task is PM-flavored.
 ---
 
-# Product Management — `pm-skills` (69 skills)
+# Product Management — `pm-skills` (70 skills)
 
 Product lens: discovery, strategy, execution, research, analytics, GTM, marketing, AI-shipping. Auto-load on PM-flavored tasks (PRDs, roadmaps, OKRs, personas, pricing, launches). Typical flow: **discovery → strategy → execution → GTM → ship**.
 
@@ -41,6 +41,7 @@ Product lens: discovery, strategy, execution, research, analytics, GTM, marketin
 | Execution | `sprint-plan` | Plan a sprint — capacity, story selection, dependencies, risks |
 | Execution | `retro` | Facilitate a sprint retrospective with prioritized action items |
 | Execution | `release-notes` | Generate user-facing release notes from tickets / PRDs / changelogs |
+| Execution | `release-notes-email` | Same notes as an Outlook-ready email: `.eml` draft with inline screenshots + HTML preview |
 | Execution | `pre-mortem` | Stress-test a PRD / launch plan for what could go wrong |
 | Execution | `stakeholder-map` | Power / interest grid + per-quadrant communication plan |
 | Execution | `summarize-meeting` | Turn a meeting transcript into notes + action items |

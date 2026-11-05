@@ -1,0 +1,57 @@
+{
+  "_note": "Worked example for a fictional product (Acme Tasks). Image paths are relative to this spec file; replace them with the prepped screenshots for your release.",
+  "subject": "Acme Tasks update on [date]: Board view, recurring tasks, and a change to reminders",
+  "preheader": "Board view, recurring tasks, CSV exports, and a change to due-date reminders.",
+  "eyebrow": "Acme Tasks update",
+  "title": "Board view, recurring tasks, and CSV exports",
+  "accent": "#C8323A",
+  "intro": [
+    "Hi everyone,",
+    "A new Acme Tasks update goes live on **[date]**. You don't need to do anything to get it. Once it's out, just refresh the page or reopen the app."
+  ],
+  "heads_up": {
+    "title": "Heads up: two things work differently",
+    "blocks": [
+      {"type": "h3", "text": "Reminders now arrive the morning a task is due"},
+      {"type": "bullets", "items": [
+        "Due-date reminders used to arrive the evening before. They now arrive at **8:00 AM** on the day the task is due.",
+        "To pick a different time, open **Settings**, then **Notifications**, and change **Reminder time**.",
+        "**Tasks with no due date** no longer send reminders. Add a due date to any task you still want a reminder for."
+      ]},
+      {"type": "h3", "text": "Archived projects are now read-only"},
+      {"type": "p", "text": "You can still open and search them. To edit one, choose **Restore project** first.", "margin_bottom": 0}
+    ]
+  },
+  "sections": [
+    {"title": "What's new", "blocks": [
+      {"type": "h3", "text": "Board view for every project"},
+      {"type": "p", "text": "A new **Board** view sits next to **List**. It shows tasks as cards in columns that you can drag between. It opens in List on your phone and Board on your computer, and it remembers whichever one you pick."},
+      {"type": "img", "src": "images/board-desktop.png", "alt": "A project in Board view on a computer", "caption": "Board view on your computer"},
+      {"type": "img_pair", "images": [
+        {"src": "images/list-phone.png", "alt": "A project in List view on a phone", "caption": "List view on your phone"},
+        {"src": "images/board-phone.png", "alt": "A project in Board view on a phone", "caption": "Board view on your phone"}
+      ]},
+      {"type": "h3", "text": "Recurring tasks"},
+      {"type": "p", "text": "Open a task, choose **Repeat**, and pick daily, weekly, or monthly. When you complete it, the next one appears on its own."},
+      {"type": "img", "src": "images/repeat-menu.png", "alt": "The Repeat menu on a task"},
+      {"type": "h3", "text": "Export any list to CSV"},
+      {"type": "p", "text": "Open the three-dot menu in the top right of a list and choose **Export to CSV**. The file opens in Excel or Google Sheets.", "margin_bottom": 0}
+    ]},
+    {"title": "Improvements", "blocks": [
+      {"type": "bullets", "items": [
+        "**Faster task entry.** Press **Enter** after adding a task to start the next one right below it.",
+        "**Your filters stay put.** On the Tasks list, your search and filters are still there when you open a task and come back.",
+        "**Clickable names.** Project names in search results now open the project.",
+        "**Quicker loading.** Large projects open a little faster."
+      ]}
+    ]},
+    {"title": "Fixes", "blocks": [
+      {"type": "bullets", "items": [
+        "The **Completed** filter now shows only completed tasks.",
+        "Some tasks showed a due date one day early for people in other time zones. They now show the right day."
+      ]}
+    ]}
+  ],
+  "closing": ["If something doesn't look right after the update, just reply to this email and we'll take a look."],
+  "signoff": ["Thanks,", "[Your name]"]
+}
