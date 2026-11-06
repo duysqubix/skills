@@ -19,7 +19,7 @@ Every roadmap uses the same page, so the user can read any of them at a glance. 
 
 ## Two modes
 
-- **Live.** Use this whenever the Artifact tool is available and the user's capability roster includes `db`; the `artifact-capabilities` skill lists the roster. The page is published once with the `db` capability and reads everything from the artifact's database. You update it by writing rows with the `ArtifactData` tool, with no republish, and anyone with the link sees the change at once. When the You-are-here flag moves, an open page pops up a note saying what finished and where the flag is now. This is what keeps a roadmap current as work moves.
+- **Live.** Use this whenever the Artifact tool is available and the user's capability roster includes `db`; the `artifact-capabilities` skill lists the roster. The page is published once with the `db` capability and reads everything from the artifact's database. You update it by writing rows with the `ArtifactData` tool, with no republish, and anyone with the link sees the change at once. When the You-are-here flag moves, an open page pops up a note saying what finished and where the flag is now. With the [roadmap-keeper](https://github.com/duysqubix/roadmap-keeper) mod installed, the page also shows each AI agent at work on the roadmap: a ring and a name tag in its color on the step it works on. This is what keeps a roadmap current as work moves.
 - **Static.** The data is embedded in the page. Use this when there's no Artifact tool (a plain chat or a script), when `db` isn't offered, or when the user wants a standalone HTML file. You update it by editing `roadmap.json`, rebuilding, and publishing or sending the page again.
 
 ## 1. Gather
@@ -240,6 +240,7 @@ Use `ArtifactData`; never republish the page to change data.
    - New records: `set` (no version).
    - Removals: `delete` with `if_version`. To remove one field, write `{"<field>": {"__delete__": true}}` in an `update`.
    - Activity entries: `set` in `activity` with `doc_id` `a-YYYYMMDD-HHMMSS`, taken from the UTC time. If that id is taken (the write is refused), add `-2`.
+3. Leave the `agents` collection alone. The roadmap-keeper mod writes it: one row per agent at work, which the page draws on the step the session last marked `active`, or else on the You-are-here step. Mark a step `active` only when work on it really started, never just to move a name tag.
 
 To answer "where are we?", read `meta`/`summary` and `steps` and reply with the current step, the last one done, what's next and the open gates.
 

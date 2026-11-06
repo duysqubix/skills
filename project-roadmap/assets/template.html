@@ -12,6 +12,7 @@
   --ready: #9A5F08; --ready-soft: #FAEED8;
   --blocked: #B23A3A; --blocked-soft: #F7E2E2;
   --todo: #8A98A2; --todo-soft: #EBEFF1;
+  --ag-1: #6E38B8; --ag-2: #9D1A7E; --ag-3: #1853C6; --on-ag: #FFFFFF;
   --font-display: "Barlow Semi Condensed", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
   --font-body: "Barlow", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
@@ -23,6 +24,7 @@
     --done: #5EC28C; --done-soft: #15301F; --on-done: #0D1418;
     --ready: #E6A845; --ready-soft: #33270F; --blocked: #E87676; --blocked-soft: #371A1A;
     --todo: #6F808B; --todo-soft: #1D2830;
+    --ag-1: #B696F7; --ag-2: #E486C6; --ag-3: #82A8F4; --on-ag: #0D1418;
     color-scheme: dark;
   }
 }
@@ -32,6 +34,7 @@
   --done: #5EC28C; --done-soft: #15301F; --on-done: #0D1418;
   --ready: #E6A845; --ready-soft: #33270F; --blocked: #E87676; --blocked-soft: #371A1A;
   --todo: #6F808B; --todo-soft: #1D2830;
+  --ag-1: #B696F7; --ag-2: #E486C6; --ag-3: #82A8F4; --on-ag: #0D1418;
   color-scheme: dark;
 }
 
@@ -226,12 +229,35 @@ footer { color: var(--muted); font-size: 13px; max-width: 80ch; }
 .pop .acts { display: flex; gap: 8px; margin-top: 4px; }
 @keyframes pop-in { from { transform: translateY(12px); opacity: 0; } }
 
+/* Agents at work (live pages): the step an agent works on gets a ring and a name tag in its color. A helper's tag is
+   outlined in its parent's color. */
+.ag { display: inline-block; font-family: var(--font-mono); font-size: 11px; font-weight: 500; line-height: 16px; letter-spacing: 0.02em;
+  padding: 1px 7px; border-radius: 4px; white-space: nowrap; color: var(--on-ag); background: var(--c); text-decoration: none; }
+.ag.helper { color: var(--c); background: var(--surface); box-shadow: inset 0 0 0 1px var(--c); }
+a.ag:hover { text-decoration: underline; text-underline-offset: 2px; }
+.ags { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; }
+.line > li.has-ag { padding-top: 16px; }
+.line > li.w-row.has-ag { padding-top: 16px; --node-y: 38px; }
+.s-row.has-ag { --node-y: 29px; }
+.ag-ring { position: absolute; z-index: 1; border: 2px solid var(--c); border-radius: 9px; pointer-events: none; }
+.ag-tab { position: absolute; z-index: 2; top: -5px; right: 18px; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px; max-width: calc(100% - 72px); }
+.dot.has-ag, .hub.has-ag { position: relative; }
+.dot.has-ag::after, .hub.has-ag::after { content: ""; position: absolute; border-radius: 50%; background: var(--ring); pointer-events: none; }
+.dot.has-ag::after { inset: 0; -webkit-mask: radial-gradient(circle, transparent 6.5px, #000 7px); mask: radial-gradient(circle, transparent 6.5px, #000 7px); }
+.hub.has-ag::after { inset: -10px; -webkit-mask: radial-gradient(circle, transparent 27.5px, #000 28px); mask: radial-gradient(circle, transparent 27.5px, #000 28px); } /* inset counts from inside the hub's 3px border */
+.st .ags { max-width: 150px; margin-top: 2px; }
+.ag-line { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 7px; font-size: 13px; color: var(--muted); }
+.ag-nw { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px 7px; }
+.ahead-list .ags { justify-content: flex-start; margin-top: 3px; }
+.lg-ag { width: 11px; height: 11px; border-radius: 50%; border: 2px solid var(--todo); background: var(--surface); box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--ag-1); margin: 0 2px; }
+
 @media (max-width: 900px) {
   .main, .now { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 480px) {
   .line > li { padding-right: 12px; grid-template-columns: 46px minmax(0, 1fr); }
   .line > li::before, .line > li::after { left: 21px; }
+  .ag-tab { right: 12px; }
   .facts { grid-template-columns: minmax(0, 1fr); gap: 0 0; }
   .facts dt { padding-top: 6px; }
 }
@@ -300,7 +326,7 @@ footer { color: var(--muted); font-size: 13px; max-width: 80ch; }
 (function () {
   "use strict";
   /* Data comes from the JSON block above (static page) or, when that block is null, from the
-     artifact's db: doc meta/summary and collections phases, steps, gates, activity (live page). */
+     artifact's db: doc meta/summary and collections phases, steps, gates, activity, and agents (live page). */
   var $ = function (id) { return document.getElementById(id); };
   var esc = function (s) {
     return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
@@ -312,7 +338,7 @@ footer { color: var(--muted); font-size: 13px; max-width: 80ch; }
   var TONES = { accent: 1, amber: 1, green: 1, red: 1, ink: 1 };
   var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  var state = { meta: {}, phases: [], steps: [], gates: [], activity: [] };
+  var state = { meta: {}, phases: [], steps: [], gates: [], activity: [], agents: [] };
   var got = { meta: false, phases: false, steps: false, gates: false, activity: false };
   var collapsed = null;            // phase ids whose steps are hidden; set on the first full render
   var showSettled = false, showAllLog = false, arrived = false, offline = false;
@@ -570,7 +596,66 @@ footer { color: var(--muted); font-size: 13px; max-width: 80ch; }
       if (next && next.i <= hereIdx) cls.push("down-on");
       return x.r.t === "p" ? phaseRow(M, x.r.p, cls) : stepRow(M, x.r, cls);
     }).join("");
+    drawAgents(M); // last of the three renders, so the cards and stations are drawn too
   }
+
+  /* Agents at work, on live pages. The roadmap-keeper mod keeps one row per agent in the `agents` collection: a
+     session's row names the step (or phase) it works on, or none for the You-are-here step; a helper's row names its parent
+     session and follows it. A session not seen for 30 minutes is gone, its helpers with it. */
+  var AGENT_LIVE = 30 * 60 * 1000;
+  function drawAgents(M) {
+    document.querySelectorAll(".ag-deco").forEach(function (el) { el.remove(); });
+    document.querySelectorAll(".has-ag").forEach(function (el) { el.classList.remove("has-ag"); el.style.removeProperty("--ring"); });
+    var now = Date.now(), mains = Object.create(null), nodes = Object.create(null), at = Object.create(null); // keyed by ids anyone may write
+    M.route.forEach(function (x) { nodes[nodeId(x)] = true; });
+    state.agents.forEach(function (a) { if (!a.parent && now - stamp(a.seen) < AGENT_LIVE) mains[a.id] = a; });
+    var head = function (a) { return mains[a.parent || a.id]; }; // its session, while that one is live
+    var color = function (a) { var c = Number(head(a).color); return c === 2 || c === 3 ? c : 1; };
+    var live = state.agents.filter(function (a) { return head(a); }).sort(function (a, b) {
+      return color(a) * 2 + (a.parent ? 1 : 0) - (color(b) * 2 + (b.parent ? 1 : 0));
+    });
+    if (!live.length) return;
+    var here = M.cur ? nodeId(M.cur) : "";
+    live.forEach(function (a) {
+      var node = nodes[head(a).step] ? head(a).step : here;
+      if (node) (at[node] = at[node] || []).push(a);
+    });
+    var tag = function (a, node) {
+      var name = String(a.name || "agent"), title = a.parent ? name + ": a helper agent working for " + String(head(a).name || "a session")
+        : name + ": a Claude session working on this roadmap";
+      var attrs = ' class="ag' + (a.parent ? " helper" : "") + '" style="--c:var(--ag-' + color(a) + ')" title="' + esc(title) + '"';
+      return node ? "<a" + attrs + ' href="#' + esc(node) + '" data-node="' + esc(node) + '">' + esc(name) + "</a>" : "<span" + attrs + ">" + esc(name) + "</span>";
+    };
+    Object.keys(at).forEach(function (id) {
+      var list = at[id], q = window.CSS && CSS.escape ? CSS.escape(id) : id;
+      var colors = list.map(color).filter(function (c, i, all) { return all.indexOf(c) === i; });
+      var row = document.getElementById(id);
+      if (row && row.closest("#rm-line")) {
+        row.classList.add("has-ag");
+        row.insertAdjacentHTML("beforeend", colors.map(function (c, k) {
+          return '<span class="ag-ring ag-deco" aria-hidden="true" style="--c:var(--ag-' + c + ");inset:" + (3 + 4 * k) + "px " + (6 + 4 * k) + 'px"></span>';
+        }).join("") + '<span class="ag-tab ag-deco">' + list.map(function (a) { return tag(a); }).join("") + "</span>");
+      }
+      var dot = document.querySelector('#rm-stations .dot[data-node="' + q + '"], #rm-stations .hub[data-node="' + q + '"]');
+      if (dot) {
+        var stops = colors.map(function (c, k) { return "var(--ag-" + c + ") " + (k * 100 / colors.length) + "% " + ((k + 1) * 100 / colors.length) + "%"; });
+        dot.classList.add("has-ag");
+        dot.style.setProperty("--ring", colors.length > 1 ? "conic-gradient(" + stops.join(", ") + ")" : "var(--ag-" + colors[0] + ")");
+        dot.closest(".st").insertAdjacentHTML("beforeend", '<div class="ags ag-deco">' + list.map(function (a) { return tag(a, id); }).join("") + "</div>");
+      }
+      document.querySelectorAll('#rm-now-ahead .ahead-list a.nid[data-node="' + q + '"]').forEach(function (l) {
+        l.parentNode.insertAdjacentHTML("beforeend", '<span class="ags ag-deco">' + list.map(function (a) { return tag(a, id); }).join("") + "</span>");
+      });
+    });
+    var on = at[here] || [], nm = $("rm-now-here").querySelector(".nmeta");
+    var leads = on.filter(function (a) { return !a.parent; }), helpers = on.filter(function (a) { return a.parent; });
+    if (on.length && nm) nm.insertAdjacentHTML("afterend", '<p class="ag-line ag-deco">Working on it now: ' + leads.map(function (a) { return tag(a); }).join(" ") +
+      (helpers.length ? ' <span class="ag-nw">' + "and " + (leads.length > 1 ? "" : "its ") + (helpers.length > 1 ? "helpers " : "helper ") +
+        helpers.map(function (a) { return tag(a); }).join(" ") + "</span>" : "") + "</p>");
+    $("rm-ov-sub").insertAdjacentHTML("beforeend", '<span class="ag-deco"> · <b>' + live.length + "</b> " + (live.length === 1 ? "agent" : "agents") + " at work</span>");
+    document.querySelector(".legend").insertAdjacentHTML("beforeend", '<li class="ag-deco"><span class="lg-ag"></span>Ring and name tag: an AI agent working on it now</li>');
+  }
+  function redrawAgents() { if (!offline && got.phases && got.steps && state.phases.length) drawAgents(model()); }
 
   function gateHtml(g, settled) {
     var ph = strings(g.phases);
@@ -719,6 +804,9 @@ footer { color: var(--muted); font-size: 13px; max-width: 80ch; }
     db.collection("steps").onSnapshot(function (q) { state.steps = docs(q); got.steps = true; fresh.steps = !(q.metadata && q.metadata.fromCache); render(); }, onErr);
     db.collection("gates").onSnapshot(function (q) { state.gates = docs(q); got.gates = true; render(); }, onErr);
     db.collection("activity").onSnapshot(function (q) { state.activity = docs(q); got.activity = true; renderLog(); }, onErr);
+    // Agents at work are a bonus: a failed read leaves the roadmap as it is. A minute's timer drops agents gone quiet.
+    db.collection("agents").onSnapshot(function (q) { state.agents = docs(q); redrawAgents(); }, function () {});
+    setInterval(redrawAgents, 60 * 1000);
   }
 
   var seed, raw = ($("rm-data") || {}).textContent || "";
